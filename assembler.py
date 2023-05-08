@@ -1,235 +1,305 @@
 import sys
 import os
 
+WARNINGS = True
+if '--no-warn' in sys.argv:
+    WARNINGS = False
+
 filename = 'test.mas'
 if len(sys.argv) > 1:
     filename = sys.argv[1]
 
-if not os.path.exists(filename):
-    print(f'Error: file "{filename}" not found')
+def error(msg):
+    print(f'Error: {msg}')
     exit(1)
 
+def warn(msg):
+    if not WARNINGS:
+        return
+    print(f'Warning: {msg}')
+
+if not os.path.exists(filename):
+    error(f'file "{filename}" not found')
+
+
 opcodes = [
+    'HALT',
     'NOP',
     'SET',
     'OPR',
     'ONC',
     'JMP',
+    'GMP',
+    'JMA',
+    'GMA',
     'JMI',
-    'HALT',
     'PRNT',
     'PRTA',
-    'GMP',
-    'GMA',
-    'MOV'
+    'MOV',
+    'RTA',
+    'RTR',
 ]
 
+definitions = {}
+all_labels = {}
 def parse_value(value, line):
-    if value.startswith('@'):
-        if value not in constants:
-            print(f'Error: undefined constant "{value}" on line {line}')
-            exit(1)
-        return constants[value]
-    if value.startswith('!') or value.startswith('~!'):
+    if value.startswith('@') and value[1:] in definitions:
+        return parse_value(definitions[value[1:]], line)
+    if (value.startswith('!') or value.startswith('~')) and value[1:] in all_labels:
         return value
     try:
-        value = int(value) if '.' not in value else float(value)
+        return int(value) if value.isdigit() else float(value)
     except ValueError:
-        print(f'Error: invalid value "{value}" on line {line}')
-        exit(1)
-    return value
+        error(f'invalid value "{value}" on line {line["line"]}')
+
+def print_pass(lines):
+    print('\n')
+    for line in lines:
+        print(f'{line["line"]:3} | {line["content"]}')
 
 pass1 = []
-constants = {}
-flags = {}
 with open(filename, 'r') as f:
-    for line in f:
-        line = line.strip().split('#')[0].strip()
-        if line == '':
+    for i, line in enumerate(f.readlines()):
+        code = line.split('#')[0].strip()
+        if code == '':
             continue
-        if line[0] == ';':
-            continue
-        if line.startswith('@define'):
-            _, name, value = line.split()
-            constants['@'+name] = float(value) if '.' in value else int(value)
-            continue
-        pass1.append(line)
+        pass1.append({'line': i+1, 'content': code})
+
+print_pass(pass1)
 
 pass2 = []
 for line in pass1:
-    for const in sorted(list(constants.keys()), key=lambda x: len(x), reverse=True):
-        line = line.replace(const, str(constants[const]))
-    pass2.append(line)
+    if line['content'].startswith('@'):
+        tokens = line['content'].split()
+        if len(tokens) != 3:
+            error(f'invalid definition "{line["content"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
+        if tokens[1] in definitions:
+            error(f'duplicate definition "{line["content"]}" on line {line["line"]}. "{tokens[1]}" is already defined.')
+        definitions[tokens[1]] = tokens[2]
+    else:
+        pass2.append(line)
+
+if pass2[-1]['content'] != 'HALT':
+    pass2.append({'line': len(pass2)+1, 'content': 'HALT'})
+
+print_pass(pass2)
 
 pass3 = []
-for i, line in enumerate(pass2):
-    things = line.split(':')
-    lin = things[0].strip()
-    for flag in things[1:]:
-        flags[flag.strip()] = i+1
-    pass3.append({'line': i+1, 'tokens': lin.split()})
+label_track = []
+for line in pass2:
+    content = line['content']
+    if content.endswith(':'):
+        if ' ' in content:
+            error(f'invalid label "{content}". Label cannot contain spaces.')
+        if content[:-1] in all_labels:
+            error(f'duplicate label "{content}" on line {line["line"]}. "{content[:-1]}" is already defined.')
+        label_track.append(content[:-1])
+        all_labels[content[:-1]] = None
+        continue
+    else:
+        pass3.append({
+            'line': line['line'],
+            'content': {'tokens': content.split(), 'labels': label_track},
+            'og': line['content']
+        })
+        label_track = []
+
+print_pass(pass3)
+
 pass4 = []
 for line in pass3:
-    if line['tokens'][0] not in opcodes:
-        print(f'Error: invalid opcode "{line["tokens"][0]}" on line {line["line"]}')
-        exit(1)
+    tokens = line['content']['tokens']
+    labels = line['content']['labels']
+    for label in labels:
+        all_labels[label] = sum([len(x['content']) for x in pass4])
+    if tokens[0] == 'HALT':
+        if len(tokens) != 1:
+            error(f'invalid HALT instruction "{line["og"]}" on line {line["line"]}. Expected 1 tokens, got {len(tokens)}.')
+        pass4.append({'line': line['line'], 'content': [0]})
 
-    if line['tokens'][0] == 'NOP':
-        if len(line['tokens']) != 1:
-            print(f'Error: invalid number of arguments for opcode "NOP" on line {line["line"]}')
-            exit(1)
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': []})
+    elif tokens[0] == 'NOP':
+        if len(tokens) != 1:
+            error(f'invalid NOP instruction "{line["og"]}" on line {line["line"]}. Expected 1 tokens, got {len(tokens)}.')
+        pass4.append({'line': line['line'], 'content': [1]})
 
-    elif line['tokens'][0] == 'SET':
-        if len(line['tokens']) != 3:
-            print(f'Error: invalid number of arguments for opcode "SET" on line {line["line"]}')
-            exit(1)
-        addr = parse_value(line['tokens'][1], line['line'])
-        value = parse_value(line['tokens'][2], line['line'])
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [addr, value]})
+    elif tokens[0] == 'SET':
+        if len(tokens) != 3:
+            error(f'invalid SET instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
 
-    elif line['tokens'][0] == 'OPR':
-        if len(line['tokens']) != 5:
-            print(f'Error: invalid number of arguments for opcode "OPR" on line {line["line"]}')
-            exit(1)
-        operation = line['tokens'][1]
-        if operation not in ['ADD', 'SUB', 'MUL', 'DIV', 'MOD']:
-            print(f'Error: invalid operation "{operation}" on line {line["line"]}')
-            exit(1)
-        addr1 = parse_value(line['tokens'][2], line['line'])
-        addr2 = parse_value(line['tokens'][3], line['line'])
-        addr3 = parse_value(line['tokens'][4], line['line'])
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [['ADD', 'SUB', 'MUL', 'DIV', 'MOD'].index(operation), addr1, addr2, addr3]})
+        addr = parse_value(tokens[1], line)
+        value = parse_value(tokens[2], line)
 
-    elif line['tokens'][0] == 'ONC':
-        if len(line['tokens']) != 5:
-            print(f'Error: invalid number of arguments for opcode "ONC" on line {line["line"]}')
-            exit(1)
-        operation = line['tokens'][1]
-        if operation not in ['ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'RSUB', 'RDIV', 'RMOD']:
-            print(f'Error: invalid operation "{operation}" on line {line["line"]}')
-            exit(1)
-        addr1 = parse_value(line['tokens'][2], line['line'])
-        value = parse_value(line['tokens'][3], line['line'])
-        addr2 = parse_value(line['tokens'][4], line['line'])
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [['ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'RSUB', 'RDIV', 'RMOD'].index(operation), addr1, value, addr2]})
-        
-    elif line['tokens'][0] == 'JMP':
-        if len(line['tokens']) != 2:
-            print(f'Error: invalid number of arguments for opcode "JMP" on line {line["line"]}')
-            exit(1)
-        delta = parse_value(line['tokens'][1], line['line'])
-        if str(delta).startswith('!'):
-            delta = '~'+delta
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [delta]})
+        pass4.append({'line': line['line'], 'content': [2, addr, value]})
 
-    elif line['tokens'][0] == 'JMI':
-        if len(line['tokens']) != 5:
-            print(f'Error: invalid number of arguments for opcode "JMI" on line {line["line"]}')
-            exit(1)
-        op = line['tokens'][1]
-        if op not in ['EQU', 'NEQ', 'LSS', 'LEQ']:
-            print(f'Error: invalid operation "{op}" on line {line["line"]}')
-            exit(1)
-        addr1 = parse_value(line['tokens'][2], line['line'])
-        addr2 = parse_value(line['tokens'][3], line['line'])
-        delta = parse_value(line['tokens'][4], line['line'])
-        if str(delta).startswith('!'):
-            delta = '~'+delta
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [['EQU', 'NEQ', 'LSS', 'LEQ'].index(op), addr1, addr2, delta]})
+    elif tokens[0] == 'OPR':
+        if len(tokens) != 5:
+            error(f'invalid OPR instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
 
-    elif line['tokens'][0] == 'HALT':
-        if len(line['tokens']) != 1:
-            print(f'Error: invalid number of arguments for opcode "HALT" on line {line["line"]}')
-            exit(1)
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': []})
+        operation = tokens[1]
+        opetaion_options = [
+            'ADD',
+            'SUB',
+            'MUL',
+            'DIV',
+            'MOD',
+        ]
+        if operation not in opetaion_options:
+            error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
+        operation = opetaion_options.index(operation)
+        addr1 = parse_value(tokens[2], line)
+        addr2 = parse_value(tokens[3], line)
+        addr3 = parse_value(tokens[4], line)
 
-    elif line['tokens'][0] == 'PRNT':
-        if len(line['tokens']) != 2:
-            print(f'Error: invalid number of arguments for opcode "PRNT" on line {line["line"]}')
-            exit(1)
-        value = parse_value(line['tokens'][1], line['line'])
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [value]})
+        pass4.append({'line': line['line'], 'content': [3, operation, addr1, addr2, addr3]})
 
-    elif line['tokens'][0] == 'PRTA':
-        if len(line['tokens']) != 2:
-            print(f'Error: invalid number of arguments for opcode "PRTA" on line {line["line"]}')
-            exit(1)
-        addr = parse_value(line['tokens'][1], line['line'])
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [addr]})
+    elif tokens[0] == 'ONC':
+        if len(tokens) != 5:
+            error(f'invalid ONC instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
 
-    elif line['tokens'][0] == 'GMP':
-        if len(line['tokens']) != 2:
-            print(f'Error: invalid number of arguments for opcode "GMP" on line {line["line"]}')
-            exit(1)
-        addr = parse_value(line['tokens'][1], line['line'])
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [addr]})
+        operation = tokens[1]
+        opetaion_options = [
+            'ADD',
+            'SUB',
+            'MUL',
+            'DIV',
+            'MOD',
+            'RSUB',
+            'RDIV',
+            'RMOD',
+        ]
+        if operation not in opetaion_options:
+            error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
+        operation = opetaion_options.index(operation)
+        addr1 = parse_value(tokens[2], line)
+        addr2 = parse_value(tokens[3], line)
+        addr3 = parse_value(tokens[4], line)
 
-    elif line['tokens'][0] == 'GMA':
-        if len(line['tokens']) != 2:
-            print(f'Error: invalid number of arguments for opcode "GMA" on line {line["line"]}')
-            exit(1)
-        addr = parse_value(line['tokens'][1], line['line'])
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [addr]})
+        pass4.append({'line': line['line'], 'content': [4, operation, addr1, addr2, addr3]})
 
-    elif line['tokens'][0] == 'MOV':
-        if len(line['tokens']) != 3:
-            print(f'Error: invalid number of arguments for opcode "MOV" on line {line["line"]}')
-            exit(1)
-        addr1 = parse_value(line['tokens'][1], line['line'])
-        addr2 = parse_value(line['tokens'][2], line['line'])
-        pass4.append({'line': line['line'], 'opcode': line['tokens'][0], 'arg': [addr1, addr2]})
+    elif tokens[0] == 'JMP':
+        if len(tokens) != 2:
+            error(f'invalid JMP instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        delta = parse_value(tokens[1], line)
+        if type(delta) == str:
+            if delta.startswith('!'):
+                warn(f'JMP instruction uses relative addressing, but "{delta}" is an absolute address on line {line["line"]}.')
+
+        pass4.append({'line': line['line'], 'content': [5, 1, delta]})
+
+    elif tokens[0] == 'GMP':
+        if len(tokens) != 2:
+            error(f'invalid GMP instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        addr = parse_value(tokens[1], line)
+        if type(addr) == str:
+            if addr.startswith('~'):
+                warn(f'GMP instruction uses absolute addressing, but "{addr}" is a relative address on line {line["line"]}.')
+
+        pass4.append({'line': line['line'], 'content': [5, 0, addr]})
+
+    elif tokens[0] == 'JMA':
+        if len(tokens) != 2:
+            error(f'invalid JMA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        addr = parse_value(tokens[1], line)
+        if type(addr) == str:
+            if addr.startswith('!'):
+                warn(f'JMA instruction reads jump delta from RAM, but an absolute address "{addr}" was given on line {line["line"]}.')
+            if addr.startswith('~'):
+                warn(f'JMA instruction reads jump delta from RAM, but a relative address "{addr}" was given on line {line["line"]}.')
+
+        pass4.append({'line': line['line'], 'content': [6, 1, addr]})
+
+    elif tokens[0] == 'GMA':
+        if len(tokens) != 2:
+            error(f'invalid GMA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        addr = parse_value(tokens[1], line)
+        if type(addr) == str:
+            if not addr.startswith('!'):
+                warn(f'GMA instruction reads jump address from RAM, but an absolute address "{addr}" was given on line {line["line"]}.')
+            if not addr.startswith('~'):
+                warn(f'GMA instruction reads jump address from RAM, but a relative address "{addr}" was given on line {line["line"]}.')
+
+        pass4.append({'line': line['line'], 'content': [6, 0, addr]})
+
+    elif tokens[0] == 'JMI':
+        if len(tokens) != 2:
+            error(f'invalid JMI instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        addr = parse_value(tokens[1], line)
+        if type(addr) == str:
+            if addr.startswith('!'):
+                warn(f'JMI instruction uses relative addressing, but "{delta}" is an absolute address on line {line["line"]}.')
+
+        pass4.append({'line': line['line'], 'content': [7, addr]})
+
+    elif tokens[0] == 'PRNT':
+        if len(tokens) != 2:
+            error(f'invalid PRNT instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        value = parse_value(tokens[1], line)
+
+        pass4.append({'line': line['line'], 'content': [8, value]})
+
+    elif tokens[0] == 'PRTA':
+        if len(tokens) != 2:
+            error(f'invalid PRTA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        addr = parse_value(tokens[1], line)
+
+        pass4.append({'line': line['line'], 'content': [9, addr]})
+
+    elif tokens[0] == 'MOV':
+        if len(tokens) != 3:
+            error(f'invalid MOV instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
+
+        addr1 = parse_value(tokens[1], line)
+        addr2 = parse_value(tokens[2], line)
+
+        pass4.append({'line': line['line'], 'content': [10, addr1, addr2]})
+
+    elif tokens[0] == 'RMV':
+        if len(tokens) != 3:
+            error(f'invalid RMV instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
+
+        addr1 = parse_value(tokens[1], line)
+        addr2 = parse_value(tokens[2], line)
+
+        pass4.append({'line': line['line'], 'content': [11, addr1, addr2]})
+
+    elif tokens[0] == 'RMR':
+        if len(tokens) != 3:
+            error(f'invalid RMR instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
+
+        addr1 = parse_value(tokens[1], line)
+        addr2 = parse_value(tokens[2], line)
+
+        pass4.append({'line': line['line'], 'content': [12, addr1, addr2]})
 
     else:
-        print(f'Error: invalid opcode "{line["tokens"][0]}" on line {line["line"]}')
-        exit(1)
+        error(f'invalid instruction "{line["og"]}" on line {line["line"]}')
 
+print_pass(pass4)
 
-line_to_addr = {}
 pass5 = []
 for line in pass4:
-    line_to_addr[line['line']] = len(pass5)
-    pass5.append(opcodes.index(line['opcode']))
-    pass5.extend(line['arg'])
+    for cmd in line['content']:
+        if type(cmd) != str:
+            pass5.append(cmd)
+            continue
+        if cmd.startswith('!'):
+            label = all_labels[cmd[1:]]
+            pass5.append(label)
+        elif cmd.startswith('~'):
+            label = all_labels[cmd[1:]]
+            pass5.append(label - len(pass5) - 1)
 
-pass6 = []
-for i, line in enumerate(pass5):
-    if type(line) in [float, int]:
-        pass6.append(line)
-    else:
-        if line.startswith('~!'):
-            flag = line[2:]
-            if flag not in flags:
-                print(f'Error: invalid flag "{flag}"')
-                exit(1)
-            pass6.append(line_to_addr[flags[flag]]-i-1)
-        elif line.startswith('!'):
-            flag = line[1:]
-            if flag not in flags:
-                print(f'Error: invalid flag "{flag}"')
-                exit(1)
-            pass6.append(line_to_addr[flags[flag]])
-        else:
-            print(f'Error: invalid address "{line}"')
-            exit(1)
+print(all_labels)
 
-print(' '.join([str(x) for x in pass6]))
+print(' '.join([str(x) for x in pass5]))
 
-import json
-with open('pass1.json', 'w') as f:
-    json.dump(pass1, f, indent=4)
-with open('pass2.json', 'w') as f:
-    json.dump(pass2, f, indent=4)
-with open('pass3.json', 'w') as f:
-    json.dump(pass3, f, indent=4)
-with open('pass4.json', 'w') as f:
-    json.dump(pass4, f, indent=4)
-with open('pass5.json', 'w') as f:
-    json.dump(pass5, f, indent=4)
-
-with open('.'.join(filename.split('.')[:-1]+['num', 'json']), 'w') as f:
-    json.dump(pass6, f, indent=4)
-
-if sys.argv[-1] == '--run':
+if '--run' in sys.argv:
     import subprocess
-    subprocess.run(['python3', 'emulator.py', '.'.join(filename.split('.')[:-1]+['num', 'json'])])
+    subprocess.run(['python3', 'emulator.py', '.'.join(filename.split('.')[:-1] + ['num', 'json'])])
