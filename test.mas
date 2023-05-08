@@ -1,12 +1,12 @@
 @define start 1
-SET 0 @start
 SET 1 @start
+SET 2 @start
 #PRNT 1
 #PRNT 1
 
 loop:
-    OPR ADD 0 1 0
-    #PRTA 0
-    OPR ADD 1 0 1
-    #PRTA 1
-    JMP ~loop
+    OPR ADD 1 2 1
+    ONC ADD 2 0 0
+    OPR ADD 1 2 2
+    ONC ADD 1 0 0
+    RJMP ~loop
