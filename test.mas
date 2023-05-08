@@ -1,0 +1,10 @@
+@define ab 1
+SET 0 @ab
+SET 1 @ab
+PRNT 1
+PRNT 1
+OPR ADD 0 1 0 :sdfgs
+PRTA 0
+OPR ADD 1 0 1
+PRTA 1
+JMP !sdfgs

@@ -1,0 +1,19 @@
+@define input_1 15
+@define input_2 16
+@define output 17
+@define ret_addr* 10
+
+SET 0 4
+SET 1 -3
+# begin function call
+MOV 0 @input_1
+MOV 1 @input_2
+SET @ret_addr* !return_address
+JMP !my_function
+MOV @output 2 :return_address
+PRTA 2
+HALT
+
+# function code
+OPR MUL @input_1 @input_2 @output :my_function
+GMA @ret_addr*

@@ -1,0 +1,198 @@
+[
+    {
+        "line": 1,
+        "opcode": "SET",
+        "arg": [
+            4,
+            5
+        ]
+    },
+    {
+        "line": 2,
+        "opcode": "SET",
+        "arg": [
+            10,
+            20
+        ]
+    },
+    {
+        "line": 3,
+        "opcode": "SET",
+        "arg": [
+            7,
+            "!return_point"
+        ]
+    },
+    {
+        "line": 4,
+        "opcode": "PMV",
+        "arg": [
+            7,
+            10
+        ]
+    },
+    {
+        "line": 5,
+        "opcode": "ONC",
+        "arg": [
+            0,
+            10,
+            1,
+            10
+        ]
+    },
+    {
+        "line": 6,
+        "opcode": "JMP",
+        "arg": [
+            "~!factorial_func"
+        ]
+    },
+    {
+        "line": 7,
+        "opcode": "ONC",
+        "arg": [
+            1,
+            10,
+            1,
+            10
+        ]
+    },
+    {
+        "line": 8,
+        "opcode": "PRTA",
+        "arg": [
+            5
+        ]
+    },
+    {
+        "line": 9,
+        "opcode": "HALT",
+        "arg": []
+    },
+    {
+        "line": 10,
+        "opcode": "SET",
+        "arg": [
+            0,
+            0
+        ]
+    },
+    {
+        "line": 11,
+        "opcode": "JMI",
+        "arg": [
+            3,
+            4,
+            0,
+            "~!return_1"
+        ]
+    },
+    {
+        "line": 12,
+        "opcode": "SET",
+        "arg": [
+            7,
+            "!func_catch"
+        ]
+    },
+    {
+        "line": 13,
+        "opcode": "MOV",
+        "arg": [
+            7,
+            10
+        ]
+    },
+    {
+        "line": 14,
+        "opcode": "ONC",
+        "arg": [
+            0,
+            10,
+            1,
+            10
+        ]
+    },
+    {
+        "line": 15,
+        "opcode": "ONC",
+        "arg": [
+            1,
+            4,
+            1,
+            4
+        ]
+    },
+    {
+        "line": 16,
+        "opcode": "GMP",
+        "arg": [
+            "!factorial_func"
+        ]
+    },
+    {
+        "line": 17,
+        "opcode": "ONC",
+        "arg": [
+            1,
+            10,
+            1,
+            10
+        ]
+    },
+    {
+        "line": 18,
+        "opcode": "SET",
+        "arg": [
+            7,
+            7
+        ]
+    },
+    {
+        "line": 19,
+        "opcode": "PMV",
+        "arg": [
+            10,
+            7
+        ]
+    },
+    {
+        "line": 20,
+        "opcode": "GMA",
+        "arg": [
+            7
+        ]
+    },
+    {
+        "line": 21,
+        "opcode": "SET",
+        "arg": [
+            5,
+            1
+        ]
+    },
+    {
+        "line": 22,
+        "opcode": "SET",
+        "arg": [
+            7,
+            7
+        ]
+    },
+    {
+        "line": 23,
+        "opcode": "PMV",
+        "arg": [
+            10,
+            7
+        ]
+    },
+    {
+        "line": 24,
+        "opcode": "GMA",
+        "arg": [
+            7
+        ]
+    }
+]
