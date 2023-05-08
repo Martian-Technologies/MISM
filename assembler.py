@@ -44,7 +44,7 @@ definitions = {}
 all_labels = {}
 def parse_value(value, line):
     if value.startswith('@') and value[1:] in definitions:
-        return parse_value(definitions[value[1:]], line)
+        return value
     if (value.startswith('!') or value.startswith('~')) and value[1:] in all_labels:
         return value
     try:
@@ -284,17 +284,29 @@ for line in pass3:
 print_pass(pass4)
 
 pass5 = []
+
+def smart_parse(value, line):
+    if type(value) in [int, float]:
+        return value
+    if value.startswith('!'):
+        label = all_labels[value[1:]]
+        return label
+    if value.startswith('~'):
+        label = all_labels[value[1:]]
+        return label - len(pass5) - 1
+    if value.startswith('@'):
+        return smart_parse(definitions[value[1:]], line)
+    try:
+        return int(value) if value.isdigit() else float(value)
+    except ValueError:
+        error(f'invalid value "{value}" on line {line["line"]}')
+
 for line in pass4:
     for cmd in line['content']:
         if type(cmd) != str:
             pass5.append(cmd)
             continue
-        if cmd.startswith('!'):
-            label = all_labels[cmd[1:]]
-            pass5.append(label)
-        elif cmd.startswith('~'):
-            label = all_labels[cmd[1:]]
-            pass5.append(label - len(pass5) - 1)
+        pass5.append(smart_parse(cmd, line))
 
 print(all_labels)
 
