@@ -283,6 +283,7 @@ for line in pass3:
 
 print_pass(pass4)
 
+cmd_start_len = 0
 pass5 = []
 
 def smart_parse(value, line):
@@ -293,15 +294,16 @@ def smart_parse(value, line):
         return label
     if value.startswith('~'):
         label = all_labels[value[1:]]
-        return label - len(pass5) - 1
+        return label - cmd_start_len
     if value.startswith('@'):
         return smart_parse(definitions[value[1:]], line)
     try:
         return int(value) if value.isdigit() else float(value)
     except ValueError:
         error(f'invalid value "{value}" on line {line["line"]}')
-
 for line in pass4:
+    # pass5.append('\n')
+    cmd_start_len = len(pass5)
     for cmd in line['content']:
         if type(cmd) != str:
             pass5.append(cmd)
