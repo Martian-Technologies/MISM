@@ -35,11 +35,11 @@ opcodes = [
     'RJMA',
     'JMA',
     'JMIF',
-    'PRNT',
-    'PRTA',
     'MOV',
     'RTA',
     'RTR',
+    'PRNT',
+    'PRTA',
 ]
 
 definitions = {}
@@ -237,22 +237,6 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [7, addr]})
 
-    elif tokens[0] == 'PRNT':
-        if len(tokens) != 2:
-            error(f'invalid PRNT instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
-
-        value = parse_value(tokens[1], line)
-
-        pass4.append({'line': line['line'], 'content': [8, value]})
-
-    elif tokens[0] == 'PRTA':
-        if len(tokens) != 2:
-            error(f'invalid PRTA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
-
-        addr = parse_value(tokens[1], line)
-
-        pass4.append({'line': line['line'], 'content': [9, addr]})
-
     elif tokens[0] == 'MOV':
         if len(tokens) != 3:
             error(f'invalid MOV instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
@@ -260,7 +244,7 @@ for line in pass3:
         addr1 = parse_value(tokens[1], line)
         addr2 = parse_value(tokens[2], line)
 
-        pass4.append({'line': line['line'], 'content': [10, addr1, addr2]})
+        pass4.append({'line': line['line'], 'content': [8, addr1, addr2]})
 
     elif tokens[0] == 'RMV':
         if len(tokens) != 3:
@@ -269,7 +253,7 @@ for line in pass3:
         addr1 = parse_value(tokens[1], line)
         addr2 = parse_value(tokens[2], line)
 
-        pass4.append({'line': line['line'], 'content': [11, addr1, addr2]})
+        pass4.append({'line': line['line'], 'content': [9, addr1, addr2]})
 
     elif tokens[0] == 'RMR':
         if len(tokens) != 3:
@@ -278,7 +262,23 @@ for line in pass3:
         addr1 = parse_value(tokens[1], line)
         addr2 = parse_value(tokens[2], line)
 
-        pass4.append({'line': line['line'], 'content': [12, addr1, addr2]})
+        pass4.append({'line': line['line'], 'content': [10, addr1, addr2]})
+
+    elif tokens[0] == 'PRNT':
+        if len(tokens) != 2:
+            error(f'invalid PRNT instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        value = parse_value(tokens[1], line)
+
+        pass4.append({'line': line['line'], 'content': [11, value]})
+
+    elif tokens[0] == 'PRTA':
+        if len(tokens) != 2:
+            error(f'invalid PRTA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        addr = parse_value(tokens[1], line)
+
+        pass4.append({'line': line['line'], 'content': [12, addr]})
 
     else:
         error(f'invalid instruction "{line["og"]}" on line {line["line"]}')
