@@ -1,5 +1,7 @@
 import sys
 import os
+import json
+
 
 WARNINGS = True
 if '--no-warn' in sys.argv:
@@ -299,6 +301,10 @@ for line in pass4:
 print(all_labels)
 
 print(' '.join([str(x) for x in pass5]))
+
+out_file = open("C:\Program Files (x86)\Steam\steamapps\common\Scrap Mechanic\Data\Importer\Importer.json", "w")
+  
+json.dump(pass5, out_file, indent = 4)
 
 if '--run' in sys.argv:
     import subprocess
