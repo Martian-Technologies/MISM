@@ -28,11 +28,11 @@ opcodes = [
     'SET',
     'OPR',
     'ONC',
+    'RJMP',
     'JMP',
-    'GMP',
+    'RJMA',
     'JMA',
-    'GMA',
-    'JMI',
+    'JMIF',
     'PRNT',
     'PRTA',
     'MOV',
@@ -176,27 +176,40 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [4, operation, addr1, addr2, addr3]})
 
-    elif tokens[0] == 'JMP':
+    elif tokens[0] == 'RJMP':
         if len(tokens) != 2:
-            error(f'invalid JMP instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+            error(f'invalid RJMP instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
         delta = parse_value(tokens[1], line)
         if type(delta) == str:
             if delta.startswith('!'):
-                warn(f'JMP instruction uses relative addressing, but "{delta}" is an absolute address on line {line["line"]}.')
+                warn(f'RJMP instruction uses relative addressing, but "{delta}" is an absolute address on line {line["line"]}.')
 
         pass4.append({'line': line['line'], 'content': [5, 1, delta]})
 
-    elif tokens[0] == 'GMP':
+    elif tokens[0] == 'JMP':
         if len(tokens) != 2:
-            error(f'invalid GMP instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+            error(f'invalid JMP instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
         addr = parse_value(tokens[1], line)
         if type(addr) == str:
             if addr.startswith('~'):
-                warn(f'GMP instruction uses absolute addressing, but "{addr}" is a relative address on line {line["line"]}.')
+                warn(f'JMP instruction uses absolute addressing, but "{addr}" is a relative address on line {line["line"]}.')
 
         pass4.append({'line': line['line'], 'content': [5, 0, addr]})
+
+    elif tokens[0] == 'RJMA':
+        if len(tokens) != 2:
+            error(f'invalid RJMA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+
+        addr = parse_value(tokens[1], line)
+        if type(addr) == str:
+            if addr.startswith('!'):
+                warn(f'RJMA instruction reads jump delta from RAM, but an absolute address "{addr}" was given on line {line["line"]}.')
+            if addr.startswith('~'):
+                warn(f'RJMA instruction reads jump delta from RAM, but a relative address "{addr}" was given on line {line["line"]}.')
+
+        pass4.append({'line': line['line'], 'content': [6, 1, addr]})
 
     elif tokens[0] == 'JMA':
         if len(tokens) != 2:
@@ -204,34 +217,21 @@ for line in pass3:
 
         addr = parse_value(tokens[1], line)
         if type(addr) == str:
-            if addr.startswith('!'):
-                warn(f'JMA instruction reads jump delta from RAM, but an absolute address "{addr}" was given on line {line["line"]}.')
-            if addr.startswith('~'):
-                warn(f'JMA instruction reads jump delta from RAM, but a relative address "{addr}" was given on line {line["line"]}.')
-
-        pass4.append({'line': line['line'], 'content': [6, 1, addr]})
-
-    elif tokens[0] == 'GMA':
-        if len(tokens) != 2:
-            error(f'invalid GMA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
-
-        addr = parse_value(tokens[1], line)
-        if type(addr) == str:
             if not addr.startswith('!'):
-                warn(f'GMA instruction reads jump address from RAM, but an absolute address "{addr}" was given on line {line["line"]}.')
+                warn(f'JMA instruction reads jump address from RAM, but an absolute address "{addr}" was given on line {line["line"]}.')
             if not addr.startswith('~'):
-                warn(f'GMA instruction reads jump address from RAM, but a relative address "{addr}" was given on line {line["line"]}.')
+                warn(f'JMA instruction reads jump address from RAM, but a relative address "{addr}" was given on line {line["line"]}.')
 
         pass4.append({'line': line['line'], 'content': [6, 0, addr]})
 
-    elif tokens[0] == 'JMI':
+    elif tokens[0] == 'JMIF':
         if len(tokens) != 2:
-            error(f'invalid JMI instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+            error(f'invalid JMIF instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
         addr = parse_value(tokens[1], line)
         if type(addr) == str:
             if addr.startswith('!'):
-                warn(f'JMI instruction uses relative addressing, but "{delta}" is an absolute address on line {line["line"]}.')
+                warn(f'JMIF instruction uses relative addressing, but "{delta}" is an absolute address on line {line["line"]}.')
 
         pass4.append({'line': line['line'], 'content': [7, addr]})
 
