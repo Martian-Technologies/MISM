@@ -48,12 +48,29 @@ alias_table = {
     'RM': ['RMV', 'RMOV'],
     'MR': ['MVR', 'MOVR'],
     'RMR': ['RMVR', 'RMOVR'],
+    'add': ['+'],
+    'sub': ['-'],
+    'mul': ['*'],
+    'div': ['/'],
+    'mod': ['%'],
+    'pow': ['^'],
+    'rsub': ['r-'],
+    'rdiv': ['r/'],
+    'rmod': ['r%'],
+    'rpow': ['r^'],
+    'equ': ['='],
+    'neq': ['!='],
+    'lss': ['<'],
+    'leq': ['<='],
+    'mor': ['>'],
+    'meq': ['>='],
 }
 
 replacements = {}
 for opcode in alias_table:
     for alias in alias_table[opcode]:
         replacements[alias.lower()] = opcode
+    replacements[opcode] = opcode
 for opcode in opcodes:
     replacements[opcode.lower()] = opcode
 
@@ -152,7 +169,6 @@ for line in pass3:
         if len(tokens) != 5:
             error(f'invalid OPR instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
 
-        operation = tokens[1]
         opetaion_options = [
             'add',
             'sub',
@@ -160,7 +176,12 @@ for line in pass3:
             'div',
             'mod',
         ]
-        if operation.lower() not in opetaion_options:
+        operation = tokens[1].lower()
+        if operation not in replacements:
+            error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
+        operation = replacements[operation]
+
+        if operation not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
         operation = opetaion_options.index(operation.lower())
         addr1 = parse_value(tokens[2], line)
@@ -172,8 +193,6 @@ for line in pass3:
     elif replacements[tokens[0].lower()] == 'ONC':
         if len(tokens) != 5:
             error(f'invalid ONC instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
-
-        operation = tokens[1]
         opetaion_options = [
             'add',
             'sub',
@@ -184,7 +203,12 @@ for line in pass3:
             'rdiv',
             'rmod',
         ]
-        if operation.lower() not in opetaion_options:
+        operation = tokens[1].lower()
+        if operation not in replacements:
+            error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
+        operation = replacements[operation]
+
+        if operation not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
         operation = opetaion_options.index(operation.lower())
         addr1 = parse_value(tokens[2], line)
@@ -244,15 +268,26 @@ for line in pass3:
     elif replacements[tokens[0].lower()] == 'JMIF':
         if len(tokens) != 5:
             error(f'invalid JMIF instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
-
-        operation = tokens[1]
         opetaion_options = [
             'equ',
             'neq',
             'lss',
             'leq'
         ]
-        if operation.lower() not in opetaion_options:
+        flipOperation = {
+            'mor': 'lss',
+            'meq': 'leq',
+        }
+        operation = tokens[1].lower()
+        if operation not in replacements:
+            error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
+        operation = replacements[operation]
+        if operation in flipOperation:
+            swap = tokens[2]
+            tokens[2] = tokens[3]
+            tokens[3] = swap
+            operation = flipOperation[operation]
+        if operation not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
         operation = opetaion_options.index(operation.lower())
         addr1 = parse_value(tokens[2], line)
