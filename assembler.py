@@ -227,15 +227,27 @@ for line in pass3:
         pass4.append({'line': line['line'], 'content': [6, 0, addr]})
 
     elif tokens[0] == 'JMIF':
-        if len(tokens) != 2:
-            error(f'invalid JMIF instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+        if len(tokens) != 5:
+            error(f'invalid JMIF instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
 
-        addr = parse_value(tokens[1], line)
+        operation = tokens[1]
+        opetaion_options = [
+            'EQU',
+            'NEQ',
+            'LSS',
+            'LEQ'
+        ]
+        if operation not in opetaion_options:
+            error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
+        operation = opetaion_options.index(operation)
+        addr1 = parse_value(tokens[2], line)
+        addr2 = parse_value(tokens[3], line)
+        delta = parse_value(tokens[4], line)
         if type(addr) == str:
             if addr.startswith('!'):
                 warn(f'JMIF instruction uses relative addressing, but "{delta}" is an absolute address on line {line["line"]}.')
 
-        pass4.append({'line': line['line'], 'content': [7, addr]})
+        pass4.append({'line': line['line'], 'content': [7, operation, addr1, addr2, delta]})
 
     elif tokens[0] == 'M':
         if len(tokens) != 3:
