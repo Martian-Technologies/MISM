@@ -37,10 +37,25 @@ opcodes = [
     'JMIF',
     'M',
     'RM',
+    'MR',
     'RMR',
     'PRI',
     'PRIA',
 ]
+
+alias_table = {
+    'M': ['MV', 'MOV'],
+    'RM': ['RMV', 'RMOV'],
+    'MR': ['MVR', 'MOVR'],
+    'RMR': ['RMVR', 'RMOVR'],
+}
+
+replacements = {}
+for opcode in alias_table:
+    for alias in alias_table[opcode]:
+        replacements[alias.lower()] = opcode
+for opcode in opcodes:
+    replacements[opcode.lower()] = opcode
 
 definitions = {}
 all_labels = {}
@@ -114,17 +129,17 @@ for line in pass3:
     labels = line['content']['labels']
     for label in labels:
         all_labels[label] = sum([len(x['content']) for x in pass4])
-    if tokens[0] == 'HALT':
+    if replacements[tokens[0].lower()] == 'HALT':
         if len(tokens) != 1:
             error(f'invalid HALT instruction "{line["og"]}" on line {line["line"]}. Expected 1 tokens, got {len(tokens)}.')
         pass4.append({'line': line['line'], 'content': [0]})
 
-    elif tokens[0] == 'NOP':
+    elif replacements[tokens[0].lower()] == 'NOP':
         if len(tokens) != 1:
             error(f'invalid NOP instruction "{line["og"]}" on line {line["line"]}. Expected 1 tokens, got {len(tokens)}.')
         pass4.append({'line': line['line'], 'content': [1]})
 
-    elif tokens[0] == 'SET':
+    elif replacements[tokens[0].lower()] == 'SET':
         if len(tokens) != 3:
             error(f'invalid SET instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
 
@@ -133,52 +148,52 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [2, addr, value]})
 
-    elif tokens[0] == 'OPR':
+    elif replacements[tokens[0].lower()] == 'OPR':
         if len(tokens) != 5:
             error(f'invalid OPR instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
 
         operation = tokens[1]
         opetaion_options = [
-            'ADD',
-            'SUB',
-            'MUL',
-            'DIV',
-            'MOD',
+            'add',
+            'sub',
+            'mul',
+            'div',
+            'mod',
         ]
-        if operation not in opetaion_options:
+        if operation.lower() not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
-        operation = opetaion_options.index(operation)
+        operation = opetaion_options.index(operation.lower())
         addr1 = parse_value(tokens[2], line)
         addr2 = parse_value(tokens[3], line)
         addr3 = parse_value(tokens[4], line)
 
         pass4.append({'line': line['line'], 'content': [3, operation, addr1, addr2, addr3]})
 
-    elif tokens[0] == 'ONC':
+    elif replacements[tokens[0].lower()] == 'ONC':
         if len(tokens) != 5:
             error(f'invalid ONC instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
 
         operation = tokens[1]
         opetaion_options = [
-            'ADD',
-            'SUB',
-            'MUL',
-            'DIV',
-            'MOD',
-            'RSUB',
-            'RDIV',
-            'RMOD',
+            'add',
+            'sub',
+            'mul',
+            'div',
+            'mod',
+            'rsub',
+            'rdiv',
+            'rmod',
         ]
-        if operation not in opetaion_options:
+        if operation.lower() not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
-        operation = opetaion_options.index(operation)
+        operation = opetaion_options.index(operation.lower())
         addr1 = parse_value(tokens[2], line)
         addr2 = parse_value(tokens[3], line)
         addr3 = parse_value(tokens[4], line)
 
         pass4.append({'line': line['line'], 'content': [4, operation, addr1, addr2, addr3]})
 
-    elif tokens[0] == 'RJMP':
+    elif replacements[tokens[0].lower()] == 'RJMP':
         if len(tokens) != 2:
             error(f'invalid RJMP instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
@@ -189,7 +204,7 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [5, 1, delta]})
 
-    elif tokens[0] == 'JMP':
+    elif replacements[tokens[0].lower()] == 'JMP':
         if len(tokens) != 2:
             error(f'invalid JMP instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
@@ -200,7 +215,7 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [5, 0, addr]})
 
-    elif tokens[0] == 'RJMA':
+    elif replacements[tokens[0].lower()] == 'RJMA':
         if len(tokens) != 2:
             error(f'invalid RJMA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
@@ -213,7 +228,7 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [6, 1, addr]})
 
-    elif tokens[0] == 'JMA':
+    elif replacements[tokens[0].lower()] == 'JMA':
         if len(tokens) != 2:
             error(f'invalid JMA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
@@ -226,20 +241,20 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [6, 0, addr]})
 
-    elif tokens[0] == 'JMIF':
+    elif replacements[tokens[0].lower()] == 'JMIF':
         if len(tokens) != 5:
             error(f'invalid JMIF instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
 
         operation = tokens[1]
         opetaion_options = [
-            'EQU',
-            'NEQ',
-            'LSS',
-            'LEQ'
+            'equ',
+            'neq',
+            'lss',
+            'leq'
         ]
-        if operation not in opetaion_options:
+        if operation.lower() not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
-        operation = opetaion_options.index(operation)
+        operation = opetaion_options.index(operation.lower())
         addr1 = parse_value(tokens[2], line)
         addr2 = parse_value(tokens[3], line)
         delta = parse_value(tokens[4], line)
@@ -249,7 +264,7 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [7, operation, addr1, addr2, delta]})
 
-    elif tokens[0] == 'M':
+    elif replacements[tokens[0].lower()] == 'M':
         if len(tokens) != 3:
             error(f'invalid M instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
 
@@ -258,7 +273,7 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [8, addr1, addr2]})
 
-    elif tokens[0] == 'RM':
+    elif replacements[tokens[0].lower()] == 'RM':
         if len(tokens) != 3:
             error(f'invalid RMV instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
 
@@ -267,7 +282,7 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [9, addr1, addr2]})
 
-    elif tokens[0] == 'MR':
+    elif replacements[tokens[0].lower()] == 'MR':
         if len(tokens) != 3:
             error(f'invalid RMV instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
 
@@ -276,7 +291,7 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [10, addr1, addr2]})
 
-    elif tokens[0] == 'RMR':
+    elif replacements[tokens[0].lower()] == 'RMR':
         if len(tokens) != 3:
             error(f'invalid RMR instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
 
@@ -285,7 +300,7 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [11, addr1, addr2]})
 
-    elif tokens[0] == 'PRI':
+    elif replacements[tokens[0].lower()] == 'PRI':
         if len(tokens) != 2:
             error(f'invalid PRI instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
@@ -293,7 +308,7 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [12, value]})
 
-    elif tokens[0] == 'PRIA':
+    elif replacements[tokens[0].lower()] == 'PRIA':
         if len(tokens) != 2:
             error(f'invalid PRIA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
@@ -333,9 +348,24 @@ for line in pass4:
             continue
         pass5.append(smart_parse(cmd, line))
 
-print(all_labels)
+# print(all_labels)
 
-print(' '.join([str(x) for x in pass5]))
+print_thing = [[]]
+pass_4_index = 0
+pass_4_internal_index = 0
+for cmd in pass5:
+    print_thing[-1].append(str(cmd))
+    if pass_4_internal_index == len(pass4[pass_4_index]['content']) - 1:
+        str_len = sum([len(x) for x in print_thing[-1]])+len(print_thing[-1])-1
+        spaces = 14 - str_len
+        print_thing[-1].append((' '*spaces)+' # '+str(' '.join(pass3[pass_4_index]['content']['tokens'])))
+        pass_4_index += 1
+        pass_4_internal_index = 0
+        print_thing.append([])
+    else:
+        pass_4_internal_index += 1
+print()
+print('\n'.join([' '.join(line) for line in print_thing]))
 
 out_file = open("C:\Program Files (x86)\Steam\steamapps\common\Scrap Mechanic\Data\Importer\Importer.json", "w")
   
