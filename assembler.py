@@ -35,11 +35,11 @@ opcodes = [
     'RJMA',
     'JMA',
     'JMIF',
-    'MOV',
-    'RTA',
-    'RTR',
-    'PRNT',
-    'PRTA',
+    'M',
+    'RM',
+    'RMR',
+    'PRI',
+    'PRIA',
 ]
 
 definitions = {}
@@ -237,16 +237,16 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [7, addr]})
 
-    elif tokens[0] == 'MOV':
+    elif tokens[0] == 'M':
         if len(tokens) != 3:
-            error(f'invalid MOV instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
+            error(f'invalid M instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
 
         addr1 = parse_value(tokens[1], line)
         addr2 = parse_value(tokens[2], line)
 
         pass4.append({'line': line['line'], 'content': [8, addr1, addr2]})
 
-    elif tokens[0] == 'RMV':
+    elif tokens[0] == 'RM':
         if len(tokens) != 3:
             error(f'invalid RMV instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
 
@@ -255,6 +255,15 @@ for line in pass3:
 
         pass4.append({'line': line['line'], 'content': [9, addr1, addr2]})
 
+    elif tokens[0] == 'MR':
+        if len(tokens) != 3:
+            error(f'invalid RMV instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
+
+        addr1 = parse_value(tokens[1], line)
+        addr2 = parse_value(tokens[2], line)
+
+        pass4.append({'line': line['line'], 'content': [10, addr1, addr2]})
+
     elif tokens[0] == 'RMR':
         if len(tokens) != 3:
             error(f'invalid RMR instruction "{line["og"]}" on line {line["line"]}. Expected 3 tokens, got {len(tokens)}.')
@@ -262,30 +271,30 @@ for line in pass3:
         addr1 = parse_value(tokens[1], line)
         addr2 = parse_value(tokens[2], line)
 
-        pass4.append({'line': line['line'], 'content': [10, addr1, addr2]})
+        pass4.append({'line': line['line'], 'content': [11, addr1, addr2]})
 
-    elif tokens[0] == 'PRNT':
+    elif tokens[0] == 'PRI':
         if len(tokens) != 2:
-            error(f'invalid PRNT instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+            error(f'invalid PRI instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
         value = parse_value(tokens[1], line)
 
-        pass4.append({'line': line['line'], 'content': [11, value]})
+        pass4.append({'line': line['line'], 'content': [12, value]})
 
-    elif tokens[0] == 'PRTA':
+    elif tokens[0] == 'PRIA':
         if len(tokens) != 2:
-            error(f'invalid PRTA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
+            error(f'invalid PRIA instruction "{line["og"]}" on line {line["line"]}. Expected 2 tokens, got {len(tokens)}.')
 
         addr = parse_value(tokens[1], line)
 
-        pass4.append({'line': line['line'], 'content': [12, addr]})
+        pass4.append({'line': line['line'], 'content': [13, addr]})
 
     else:
         error(f'invalid instruction "{line["og"]}" on line {line["line"]}')
 
 print_pass(pass4)
 
-cmd_start_len = 0
+cmd_start_index = 0
 pass5 = []
 
 def smart_parse(value, line):
@@ -296,7 +305,7 @@ def smart_parse(value, line):
         return label
     if value.startswith('~'):
         label = all_labels[value[1:]]
-        return label - cmd_start_len
+        return label - cmd_start_index
     if value.startswith('@'):
         return smart_parse(definitions[value[1:]], line)
     try:
@@ -305,7 +314,7 @@ def smart_parse(value, line):
         error(f'invalid value "{value}" on line {line["line"]}')
 for line in pass4:
     # pass5.append('\n')
-    cmd_start_len = len(pass5)
+    cmd_start_index = len(pass5)
     for cmd in line['content']:
         if type(cmd) != str:
             pass5.append(cmd)
