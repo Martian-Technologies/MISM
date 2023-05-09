@@ -1,8 +1,8 @@
-SET 0 1
-SET 1 1
+set 0 1
+set 1 1
 loop:
-    PRIA 0
-    OPR ADD 0 1 0
-    PRIA 1
-    OPR ADD 1 0 1
-    RJMP ~loop
+    pria 0
+    opr add 0 1 0
+    pria 1
+    opr add 1 0 1
+    rjmp ~loop

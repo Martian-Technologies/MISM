@@ -2,7 +2,8 @@ import sys
 import os
 
 PAUSE = True
-DEBUG = True
+DEBUG = False
+
 
 filename = 'test.num.json'
 if len(sys.argv) > 1:
@@ -176,7 +177,7 @@ while True:
         set_memory(write_addr, get_memory(read_addr))
     
     elif opcode == 'PRI':
-        print(f'> {get_code()}')
+        print(f'> {get_code()}') if not PAUSE else input(f'> {get_code()}')
     
     elif opcode == 'PRIA':
-        print(f'> {get_memory(get_code())}')
+        print(f'> {get_memory(get_code())}') if not PAUSE else input(f'> {get_memory(get_code())}')
