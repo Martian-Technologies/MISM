@@ -1,8 +1,8 @@
 import sys
 import os
 
-PAUSE = False
-DEBUG = False
+PAUSE = True
+DEBUG = True
 
 filename = 'test.num.json'
 if len(sys.argv) > 1:
