@@ -1,8 +1,8 @@
 import sys
 import os
 
-PAUSE = True
-DEBUG = True
+PAUSE = False
+DEBUG = False
 
 filename = 'test.num.json'
 if len(sys.argv) > 1:
@@ -130,3 +130,53 @@ while True:
             exec_pos = get_memory(read_addr)
         elif mode == 'REL':
             exec_pos = cmd_start_index + get_memory(read_addr)
+    
+    elif opcode == 'JUMPIF':
+        operation = ['==', '!=', '<', '<='][get_code()]
+        read_addr1 = get_code()
+        read_addr2 = get_code()
+        jump_delta = get_code()
+        val1 = get_memory(read_addr1)
+        val2 = get_memory(read_addr2)
+        if operation == '==':
+            if val1 == val2:
+                exec_pos += jump_delta
+        elif operation == '!=':
+            if val1 != val2:
+                exec_pos += jump_delta
+        elif operation == '<':
+            if val1 < val2:
+                exec_pos += jump_delta
+        elif operation == '<=':
+            if val1 <= val2:
+                exec_pos += jump_delta
+        
+    elif opcode == 'MOV':
+        read_addr = get_code()
+        write_addr = get_code()
+        set_memory(write_addr, get_memory(read_addr))
+    
+    elif opcode == 'RMOV':
+        read_addr = get_code()
+        write_addr = get_code()
+        read_addr = get_memory(read_addr)
+        set_memory(write_addr, get_memory(read_addr))
+    
+    elif opcode == 'MOVR':
+        read_addr = get_code()
+        write_addr = get_code()
+        write_addr = get_memory(write_addr)
+        set_memory(write_addr, get_memory(read_addr))
+
+    elif opcode == 'RMOVR':
+        read_addr = get_code()
+        write_addr = get_code()
+        read_addr = get_memory(read_addr)
+        write_addr = get_memory(write_addr)
+        set_memory(write_addr, get_memory(read_addr))
+    
+    elif opcode == 'PRI':
+        print(f'> {get_code()}')
+    
+    elif opcode == 'PRIA':
+        print(f'> {get_memory(get_code())}')

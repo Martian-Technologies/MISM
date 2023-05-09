@@ -1,12 +1,8 @@
-@define start 1
-SET 1 @start
-SET 2 @start
-#PRNT 1
-#PRNT 1
-
+SET 0 1
+SET 1 1
 loop:
-    OPR ADD 1 2 1
-    ONC ADD 2 0 0
-    OPR ADD 1 2 2
-    ONC ADD 1 0 0
+    PRIA 0
+    OPR ADD 0 1 0
+    PRIA 1
+    OPR ADD 1 0 1
     RJMP ~loop

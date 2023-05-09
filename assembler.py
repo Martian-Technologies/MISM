@@ -367,10 +367,13 @@ for cmd in pass5:
 print()
 print('\n'.join([' '.join(line) for line in print_thing]))
 
-out_file = open("C:\Program Files (x86)\Steam\steamapps\common\Scrap Mechanic\Data\Importer\Importer.json", "w")
-  
-json.dump(pass5, out_file, indent = 4)
+with open("C:\Program Files (x86)\Steam\steamapps\common\Scrap Mechanic\Data\Importer\Importer.json", "w") as out_file:
+    json.dump(pass5, out_file, indent = 4)
+
+dump_filename = '.'.join(filename.split('.')[:-1]+['num', 'json'])
+with open(dump_filename, 'w') as out_file:
+    json.dump(pass5, out_file, indent = 4)
 
 if '--run' in sys.argv:
     import subprocess
-    subprocess.run(['python3', 'emulator.py', '.'.join(filename.split('.')[:-1] + ['num', 'json'])])
+    subprocess.run([sys.executable, 'emulator.py', dump_filename], shell=True)
