@@ -44,6 +44,11 @@ opcodes = [
 ]
 
 alias_table = {
+    'OPR': ['MATH'],
+    'ONC': ['OPRC', 'CMATH'],
+    'RJMA': ['RJMPA'],
+    'JMA': ['JMPA'],
+    'JMIF': ['JMPIF'],
     'M': ['MV', 'MOV'],
     'RM': ['RMV', 'RMOV'],
     'MR': ['MVR', 'MOVR'],
@@ -175,6 +180,7 @@ for line in pass3:
             'mul',
             'div',
             'mod',
+            'pow',
         ]
         operation = tokens[1].lower()
         if operation not in replacements:
@@ -199,9 +205,7 @@ for line in pass3:
             'mul',
             'div',
             'mod',
-            'rsub',
-            'rdiv',
-            'rmod',
+            'pow',
         ]
         operation = tokens[1].lower()
         if operation not in replacements:
@@ -282,16 +286,17 @@ for line in pass3:
         if operation not in replacements:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
         operation = replacements[operation]
+        num1 = tokens[2]
+        num2 = tokens[3]
         if operation in flipOperation:
-            swap = tokens[2]
-            tokens[2] = tokens[3]
-            tokens[3] = swap
+            num2 = tokens[2]
+            num1 = tokens[3]
             operation = flipOperation[operation]
         if operation not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
         operation = opetaion_options.index(operation.lower())
-        addr1 = parse_value(tokens[2], line)
-        addr2 = parse_value(tokens[3], line)
+        addr1 = parse_value(num1, line)
+        addr2 = parse_value(num2, line)
         delta = parse_value(tokens[4], line)
         if type(addr) == str:
             if addr.startswith('!'):
