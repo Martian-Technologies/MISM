@@ -44,38 +44,16 @@ opcodes = [
 ]
 
 alias_table = {
-    'OPR': ['MATH'],
-    'ONC': ['OPRC', 'CMATH'],
-    'RJMA': ['RJMPA'],
-    'JMA': ['JMPA'],
-    'JMIF': ['JMPIF'],
     'M': ['MV', 'MOV'],
     'RM': ['RMV', 'RMOV'],
     'MR': ['MVR', 'MOVR'],
     'RMR': ['RMVR', 'RMOVR'],
-    'add': ['+'],
-    'sub': ['-'],
-    'mul': ['*'],
-    'div': ['/'],
-    'mod': ['%'],
-    'pow': ['^'],
-    'rsub': ['r-'],
-    'rdiv': ['r/'],
-    'rmod': ['r%'],
-    'rpow': ['r^'],
-    'equ': ['='],
-    'neq': ['!='],
-    'lss': ['<'],
-    'leq': ['<='],
-    'mor': ['>'],
-    'meq': ['>='],
 }
 
 replacements = {}
 for opcode in alias_table:
     for alias in alias_table[opcode]:
         replacements[alias.lower()] = opcode
-    replacements[opcode] = opcode
 for opcode in opcodes:
     replacements[opcode.lower()] = opcode
 
@@ -174,20 +152,15 @@ for line in pass3:
         if len(tokens) != 5:
             error(f'invalid OPR instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
 
+        operation = tokens[1]
         opetaion_options = [
             'add',
             'sub',
             'mul',
             'div',
             'mod',
-            'pow',
         ]
-        operation = tokens[1].lower()
-        if operation not in replacements:
-            error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
-        operation = replacements[operation]
-
-        if operation not in opetaion_options:
+        if operation.lower() not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
         operation = opetaion_options.index(operation.lower())
         addr1 = parse_value(tokens[2], line)
@@ -199,24 +172,19 @@ for line in pass3:
     elif replacements[tokens[0].lower()] == 'ONC':
         if len(tokens) != 5:
             error(f'invalid ONC instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
+
+        operation = tokens[1]
         opetaion_options = [
             'add',
             'sub',
             'mul',
             'div',
             'mod',
-            'pow',
             'rsub',
             'rdiv',
             'rmod',
-            'rpow',
         ]
-        operation = tokens[1].lower()
-        if operation not in replacements:
-            error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
-        operation = replacements[operation]
-
-        if operation not in opetaion_options:
+        if operation.lower() not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
         operation = opetaion_options.index(operation.lower())
         addr1 = parse_value(tokens[2], line)
@@ -276,31 +244,19 @@ for line in pass3:
     elif replacements[tokens[0].lower()] == 'JMIF':
         if len(tokens) != 5:
             error(f'invalid JMIF instruction "{line["og"]}" on line {line["line"]}. Expected 5 tokens, got {len(tokens)}.')
+
+        operation = tokens[1]
         opetaion_options = [
             'equ',
             'neq',
             'lss',
             'leq'
         ]
-        flipOperation = {
-            'mor': 'lss',
-            'meq': 'leq',
-        }
-        operation = tokens[1].lower()
-        if operation not in replacements:
-            error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
-        operation = replacements[operation]
-        num1 = tokens[2]
-        num2 = tokens[3]
-        if operation in flipOperation:
-            num2 = tokens[2]
-            num1 = tokens[3]
-            operation = flipOperation[operation]
-        if operation not in opetaion_options:
+        if operation.lower() not in opetaion_options:
             error(f'invalid operation "{operation}" on line {line["line"]}. Expected one of {opetaion_options}, got "{operation}".')
         operation = opetaion_options.index(operation.lower())
-        addr1 = parse_value(num1, line)
-        addr2 = parse_value(num2, line)
+        addr1 = parse_value(tokens[2], line)
+        addr2 = parse_value(tokens[3], line)
         delta = parse_value(tokens[4], line)
         if type(addr) == str:
             if addr.startswith('!'):

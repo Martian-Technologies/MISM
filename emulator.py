@@ -76,7 +76,7 @@ while True:
         set_memory(addr, val)
 
     elif opcode == 'OPR':
-        mode = ['+', '-', '*', '/', '%', '^'][get_code()]
+        mode = ['+', '-', '*', '/', '%'][get_code()]
         read_addr1 = get_code()
         read_addr2 = get_code()
         write_addr = get_code()
@@ -92,11 +92,9 @@ while True:
             set_memory(write_addr, val1 / val2)
         elif mode == '%':
             set_memory(write_addr, val1 % val2)
-        elif mode == '^':
-            set_memory(write_addr, val1 ** val2)
 
     elif opcode == 'ONC':
-        mode = ['+', '-', '*', '/', '%', '^', 'r-', 'r/', 'r%', 'r^'][get_code()]
+        mode = ['+', '-', '*', '/', '%', 'r-', 'r/', 'r%'][get_code()]
         read_addr = get_code()
         const = get_code()
         write_addr = get_code()
@@ -111,16 +109,12 @@ while True:
             set_memory(write_addr, val / const)
         elif mode == '%':
             set_memory(write_addr, val % const)
-        elif mode == '^':
-            set_memory(write_addr, val ** const)
         elif mode == 'r-':
             set_memory(write_addr, const - val)
         elif mode == 'r/':
             set_memory(write_addr, const / val)
         elif mode == 'r%':
             set_memory(write_addr, const % val)
-        elif mode == 'r^':
-            set_memory(write_addr, const ** val)
     
     elif opcode == 'JUMP':
         mode = ['NORM', 'REL'][get_code()]
