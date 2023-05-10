@@ -1,7 +1,7 @@
 import sys
 import os
 
-PAUSE = True
+PAUSE = False
 DEBUG = False
 
 
@@ -45,7 +45,7 @@ opcodes = [
     'NOP',
     'SET',
     'OPR',
-    'ONC',
+    'OPRCONST',
     'JUMP',
     'RAMJUMP',
     'JUMPIF',
@@ -62,6 +62,9 @@ while True:
     cmd_start_index = exec_pos
     cmd = get_code()
     opcode = opcodes[cmd]
+    #print(opcode, code[exec_pos], code[exec_pos + 1], code[exec_pos + 2], code[exec_pos + 3])
+    #print(memory)
+    #input()
 
     if opcode == 'HALT':
         print('Halting...')
@@ -93,7 +96,7 @@ while True:
         elif mode == '%':
             set_memory(write_addr, val1 % val2)
 
-    elif opcode == 'ONC':
+    elif opcode == 'OPRCONST':
         mode = ['+', '-', '*', '/', '%', 'r-', 'r/', 'r%'][get_code()]
         read_addr = get_code()
         const = get_code()
@@ -109,12 +112,6 @@ while True:
             set_memory(write_addr, val / const)
         elif mode == '%':
             set_memory(write_addr, val % const)
-        elif mode == 'r-':
-            set_memory(write_addr, const - val)
-        elif mode == 'r/':
-            set_memory(write_addr, const / val)
-        elif mode == 'r%':
-            set_memory(write_addr, const % val)
     
     elif opcode == 'JUMP':
         mode = ['NORM', 'REL'][get_code()]
@@ -141,16 +138,16 @@ while True:
         val2 = get_memory(read_addr2)
         if operation == '==':
             if val1 == val2:
-                exec_pos += jump_delta
+                exec_pos = cmd_start_index + jump_delta
         elif operation == '!=':
             if val1 != val2:
-                exec_pos += jump_delta
+                exec_pos = cmd_start_index + jump_delta
         elif operation == '<':
             if val1 < val2:
-                exec_pos += jump_delta
+                exec_pos = cmd_start_index + jump_delta
         elif operation == '<=':
             if val1 <= val2:
-                exec_pos += jump_delta
+                exec_pos = cmd_start_index + jump_delta
         
     elif opcode == 'MOV':
         read_addr = get_code()
