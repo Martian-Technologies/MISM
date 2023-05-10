@@ -1,9 +1,12 @@
 import sys
 import os
+import operator
+from assembler import Assembler
+
+Assembler.run(doPrints = True)
 
 PAUSE = False
 DEBUG = False
-
 
 filename = 'test.num.json'
 if len(sys.argv) > 1:
@@ -79,39 +82,21 @@ while True:
         set_memory(addr, val)
 
     elif opcode == 'OPR':
-        mode = ['+', '-', '*', '/', '%'][get_code()]
+        mode = [operator.add, operator.sub, operator.mul, operator.truediv, operator.mod, operator.pow][get_code()]
         read_addr1 = get_code()
         read_addr2 = get_code()
         write_addr = get_code()
         val1 = get_memory(read_addr1)
         val2 = get_memory(read_addr2)
-        if mode == '+':
-            set_memory(write_addr, val1 + val2)
-        elif mode == '-':
-            set_memory(write_addr, val1 - val2)
-        elif mode == '*':
-            set_memory(write_addr, val1 * val2)
-        elif mode == '/':
-            set_memory(write_addr, val1 / val2)
-        elif mode == '%':
-            set_memory(write_addr, val1 % val2)
+        set_memory(write_addr, mode(val1, val2))
 
     elif opcode == 'OPRCONST':
-        mode = ['+', '-', '*', '/', '%', 'r-', 'r/', 'r%'][get_code()]
+        mode = [operator.add, operator.sub, operator.mul, operator.truediv, operator.mod, operator.pow][get_code()]
         read_addr = get_code()
         const = get_code()
         write_addr = get_code()
         val = get_memory(read_addr)
-        if mode == '+':
-            set_memory(write_addr, val + const)
-        elif mode == '-':
-            set_memory(write_addr, val - const)
-        elif mode == '*':
-            set_memory(write_addr, val * const)
-        elif mode == '/':
-            set_memory(write_addr, val / const)
-        elif mode == '%':
-            set_memory(write_addr, val % const)
+        set_memory(write_addr, mode(val, const))
     
     elif opcode == 'JUMP':
         mode = ['NORM', 'REL'][get_code()]
@@ -130,24 +115,14 @@ while True:
             exec_pos = cmd_start_index + get_memory(read_addr)
     
     elif opcode == 'JUMPIF':
-        operation = ['==', '!=', '<', '<='][get_code()]
+        operation = [operator.eq, operator.ne, operator.lt, operator.le][get_code()]
         read_addr1 = get_code()
         read_addr2 = get_code()
         jump_delta = get_code()
         val1 = get_memory(read_addr1)
         val2 = get_memory(read_addr2)
-        if operation == '==':
-            if val1 == val2:
-                exec_pos = cmd_start_index + jump_delta
-        elif operation == '!=':
-            if val1 != val2:
-                exec_pos = cmd_start_index + jump_delta
-        elif operation == '<':
-            if val1 < val2:
-                exec_pos = cmd_start_index + jump_delta
-        elif operation == '<=':
-            if val1 <= val2:
-                exec_pos = cmd_start_index + jump_delta
+        if operation(val1, val2):
+            exec_pos = cmd_start_index + jump_delta
         
     elif opcode == 'MOV':
         read_addr = get_code()
