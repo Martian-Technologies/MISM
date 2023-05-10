@@ -206,6 +206,10 @@ for line in pass3:
             'div',
             'mod',
             'pow',
+            'rsub',
+            'rdiv',
+            'rmod',
+            'rpow',
         ]
         operation = tokens[1].lower()
         if operation not in replacements:
