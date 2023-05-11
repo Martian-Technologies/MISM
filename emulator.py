@@ -3,7 +3,7 @@ import os
 import operator
 from assembler import Assembler
 
-Assembler.run(doPrints = True)
+Assembler.run(doPrints = False)
 
 PAUSE = False
 DEBUG = False
