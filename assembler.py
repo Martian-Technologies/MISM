@@ -427,7 +427,6 @@ class Assembler:
             print('\n'.join([' '.join(line) for line in print_thing]))
 
         if Assembler.doDumps:
-            print("Dumped")
             with open("C:\Program Files (x86)\Steam\steamapps\common\Scrap Mechanic\Data\Importer\Importer.json", "w") as out_file:
                 json.dump(pass5, out_file, indent = 4)
 
