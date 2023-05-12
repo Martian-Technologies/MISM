@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+from pathlib import Path
 
 class Assembler:
     """ used to assemble assembly into machine code"""
@@ -115,25 +116,19 @@ class Assembler:
         except ValueError:
             Assembler.error(f'invalid value "{value}" on line {line["line"]}')
 
-    def run(fileName = 'test.mas', doDumps = True, doPrints = True):
+    def run(assemblyCode, doDumps = True, doPrints = True):
         """ runs the assembler """ 
         Assembler.doDumps = doDumps
         Assembler.doPrints = doPrints
         Assembler.definitions = {}
         Assembler.all_labels = {}
-        if len(sys.argv) > 1:
-            fileName = sys.argv[1]
-
-        if not os.path.exists(fileName):
-            Assembler.error(f'file "{fileName}" not found')
     
         pass1 = []
-        with open(fileName, 'r') as f:
-            for i, line in enumerate(f.readlines()):
-                code = line.split('#')[0].strip()
-                if code == '':
-                    continue
-                pass1.append({'line': i+1, 'content': code})
+        for i, line in enumerate(assemblyCode):
+            code = line.split('#')[0].strip()
+            if code == '':
+                continue
+            pass1.append({'line': i+1, 'content': code})
         if Assembler.doPrints:
             Assembler.print_pass(pass1)
         pass2 = []
@@ -429,11 +424,11 @@ class Assembler:
         if Assembler.doDumps:
             with open("C:\Program Files (x86)\Steam\steamapps\common\Scrap Mechanic\Data\Importer\Importer.json", "w") as out_file:
                 json.dump(pass5, out_file, indent = 4)
-
-            dump_fileName = '.'.join(fileName.split('.')[:-1]+['num', 'json'])
+        """
+            dump_fileName = Path("machineCode/"+'.'.join(fileName.split('.')[:-1]+['num', 'json']))
             with open(dump_fileName, 'w') as out_file:
                 json.dump(pass5, out_file, indent = 4)
-
+        """
         return pass5
 
 Assembler.init_static()

@@ -1,155 +1,147 @@
+from pathlib import Path
 import sys
 import os
 import operator
 from assembler import Assembler
 
-Assembler.run(doPrints = False)
+class Emulator:
+    PAUSE = False
+    DEBUG = False
 
-PAUSE = False
-DEBUG = False
+    code = []
+    exec_pos = 0
+    memory = []
+    opcodes = [
+        'HALT',
+        'NOP',
+        'SET',
+        'OPR',
+        'OPRCONST',
+        'JUMP',
+        'RAMJUMP',
+        'JUMPIF',
+        'MOV',
+        'RMOV',
+        'MOVR',
+        'RMOVR',
+        'PRI',
+        'PRIA'
+    ]
 
-filename = 'test.num.json'
-if len(sys.argv) > 1:
-    filename = sys.argv[1]
+    @staticmethod
+    def set_memory(addr, val):
+        Emulator.memory
+        if addr >= len(Emulator.memory):
+            Emulator.memory += [0] * (addr - len(Emulator.memory) + 1)
+        Emulator.memory[addr] = val
+        (input(Emulator.memory) if Emulator.PAUSE else print(Emulator.memory)) if Emulator.DEBUG else None
 
-if not os.path.exists(filename):
-    print(f'Error: file "{filename}" not found')
-    exit(1)
+    @staticmethod
+    def get_memory(addr):
+        Emulator.memory
+        if addr >= len(Emulator.memory):
+            Emulator.memory += [0] * (addr - len(Emulator.memory) + 1)
+        return Emulator.memory[addr]
 
-import json
+    @staticmethod
+    def get_code():
+        Emulator.code, Emulator.exec_pos
+        if Emulator.exec_pos >= len(Emulator.code):
+            return 0
+        Emulator.exec_pos += 1
+        return Emulator.code[Emulator.exec_pos-1]
 
-with open(filename, 'r') as f:
-    code = json.load(f)
+    @staticmethod
+    def run(code):
+        Emulator.code = code
+        while True:
+            cmd_start_index = Emulator.exec_pos
+            cmd = Emulator.get_code()
+            opcode = Emulator.opcodes[cmd]
+            #print(opcode, Emulator.code[exec_pos], Emulator.code[exec_pos + 1], Emulator.code[exec_pos + 2], Emulator.code[exec_pos + 3])
+            #print(Emulator.memory)
+            #input()
+            if opcode == 'HALT':
+                print('Halting...')
+                break
 
-exec_pos = 0
-memory = []
-def set_memory(addr, val):
-    global memory
-    if addr >= len(memory):
-        memory += [0] * (addr - len(memory) + 1)
-    memory[addr] = val
-    (input(memory) if PAUSE else print(memory)) if DEBUG else None
+            elif opcode == 'NOP':
+                continue
 
-def get_memory(addr):
-    global memory
-    if addr >= len(memory):
-        memory += [0] * (addr - len(memory) + 1)
-    return memory[addr]
+            elif opcode == 'SET':
+                addr = Emulator.get_code()
+                val = Emulator.get_code()
+                Emulator.set_memory(addr, val)
 
-def get_code():
-    global code, exec_pos
-    if exec_pos >= len(code):
-        return 0
-    exec_pos += 1
-    return code[exec_pos-1]
+            elif opcode == 'OPR':
+                mode = [operator.add, operator.sub, operator.mul, operator.truediv, operator.mod, operator.pow][Emulator.get_code()]
+                read_addr1 = Emulator.get_code()
+                read_addr2 = Emulator.get_code()
+                write_addr = Emulator.get_code()
+                val1 = Emulator.get_memory(read_addr1)
+                val2 = Emulator.get_memory(read_addr2)
+                Emulator.set_memory(write_addr, mode(val1, val2))
 
-opcodes = [
-    'HALT',
-    'NOP',
-    'SET',
-    'OPR',
-    'OPRCONST',
-    'JUMP',
-    'RAMJUMP',
-    'JUMPIF',
-    'MOV',
-    'RMOV',
-    'MOVR',
-    'RMOVR',
-    'PRI',
-    'PRIA'
-]
+            elif opcode == 'OPRCONST':
+                mode = [operator.add, operator.sub, operator.mul, operator.truediv, operator.mod, operator.pow][Emulator.get_code()]
+                read_addr = Emulator.get_code()
+                const = Emulator.get_code()
+                write_addr = Emulator.get_code()
+                val = Emulator.get_memory(read_addr)
+                Emulator.set_memory(write_addr, mode(val, const))
+            
+            elif opcode == 'JUMP':
+                mode = ['NORM', 'REL'][Emulator.get_code()]
+                value = Emulator.get_code()
+                if mode == 'NORM':
+                    Emulator.exec_pos = value
+                elif mode == 'REL':
+                    Emulator.exec_pos = cmd_start_index + value
+            
+            elif opcode == 'RAMJUMP':
+                mode = ['NORM', 'REL'][Emulator.get_code()]
+                read_addr = Emulator.get_code()
+                if mode == 'NORM':
+                    Emulator.exec_pos = Emulator.get_memory(read_addr)
+                elif mode == 'REL':
+                    Emulator.exec_pos = cmd_start_index + Emulator.get_memory(read_addr)
+            
+            elif opcode == 'JUMPIF':
+                operation = [operator.eq, operator.ne, operator.lt, operator.le][Emulator.get_code()]
+                read_addr1 = Emulator.get_code()
+                read_addr2 = Emulator.get_code()
+                jump_delta = Emulator.get_code()
+                val1 = Emulator.get_memory(read_addr1)
+                val2 = Emulator.get_memory(read_addr2)
+                if operation(val1, val2):
+                    Emulator.exec_pos = cmd_start_index + jump_delta
+                
+            elif opcode == 'MOV':
+                read_addr = Emulator.get_code()
+                write_addr = Emulator.get_code()
+                Emulator.set_memory(write_addr, Emulator.get_memory(read_addr))
+            
+            elif opcode == 'RMOV':
+                read_addr = Emulator.get_code()
+                write_addr = Emulator.get_code()
+                read_addr = Emulator.get_memory(read_addr)
+                Emulator.set_memory(write_addr, Emulator.get_memory(read_addr))
+            
+            elif opcode == 'MOVR':
+                read_addr = Emulator.get_code()
+                write_addr = Emulator.get_code()
+                write_addr = Emulator.get_memory(write_addr)
+                Emulator.set_memory(write_addr, Emulator.get_memory(read_addr))
 
-commands = []
-while True:
-    cmd_start_index = exec_pos
-    cmd = get_code()
-    opcode = opcodes[cmd]
-    #print(opcode, code[exec_pos], code[exec_pos + 1], code[exec_pos + 2], code[exec_pos + 3])
-    #print(memory)
-    #input()
-
-    if opcode == 'HALT':
-        print('Halting...')
-        break
-
-    elif opcode == 'NOP':
-        continue
-
-    elif opcode == 'SET':
-        addr = get_code()
-        val = get_code()
-        set_memory(addr, val)
-
-    elif opcode == 'OPR':
-        mode = [operator.add, operator.sub, operator.mul, operator.truediv, operator.mod, operator.pow][get_code()]
-        read_addr1 = get_code()
-        read_addr2 = get_code()
-        write_addr = get_code()
-        val1 = get_memory(read_addr1)
-        val2 = get_memory(read_addr2)
-        set_memory(write_addr, mode(val1, val2))
-
-    elif opcode == 'OPRCONST':
-        mode = [operator.add, operator.sub, operator.mul, operator.truediv, operator.mod, operator.pow][get_code()]
-        read_addr = get_code()
-        const = get_code()
-        write_addr = get_code()
-        val = get_memory(read_addr)
-        set_memory(write_addr, mode(val, const))
-    
-    elif opcode == 'JUMP':
-        mode = ['NORM', 'REL'][get_code()]
-        value = get_code()
-        if mode == 'NORM':
-            exec_pos = value
-        elif mode == 'REL':
-            exec_pos = cmd_start_index + value
-    
-    elif opcode == 'RAMJUMP':
-        mode = ['NORM', 'REL'][get_code()]
-        read_addr = get_code()
-        if mode == 'NORM':
-            exec_pos = get_memory(read_addr)
-        elif mode == 'REL':
-            exec_pos = cmd_start_index + get_memory(read_addr)
-    
-    elif opcode == 'JUMPIF':
-        operation = [operator.eq, operator.ne, operator.lt, operator.le][get_code()]
-        read_addr1 = get_code()
-        read_addr2 = get_code()
-        jump_delta = get_code()
-        val1 = get_memory(read_addr1)
-        val2 = get_memory(read_addr2)
-        if operation(val1, val2):
-            exec_pos = cmd_start_index + jump_delta
-        
-    elif opcode == 'MOV':
-        read_addr = get_code()
-        write_addr = get_code()
-        set_memory(write_addr, get_memory(read_addr))
-    
-    elif opcode == 'RMOV':
-        read_addr = get_code()
-        write_addr = get_code()
-        read_addr = get_memory(read_addr)
-        set_memory(write_addr, get_memory(read_addr))
-    
-    elif opcode == 'MOVR':
-        read_addr = get_code()
-        write_addr = get_code()
-        write_addr = get_memory(write_addr)
-        set_memory(write_addr, get_memory(read_addr))
-
-    elif opcode == 'RMOVR':
-        read_addr = get_code()
-        write_addr = get_code()
-        read_addr = get_memory(read_addr)
-        write_addr = get_memory(write_addr)
-        set_memory(write_addr, get_memory(read_addr))
-    
-    elif opcode == 'PRI':
-        print(f'> {get_code()}') if not PAUSE else input(f'> {get_code()}')
-    
-    elif opcode == 'PRIA':
-        print(f'> {get_memory(get_code())}') if not PAUSE else input(f'> {get_memory(get_code())}')
+            elif opcode == 'RMOVR':
+                read_addr = Emulator.get_code()
+                write_addr = Emulator.get_code()
+                read_addr = Emulator.get_memory(read_addr)
+                write_addr = Emulator.get_memory(write_addr)
+                Emulator.set_memory(write_addr, Emulator.get_memory(read_addr))
+            
+            elif opcode == 'PRI':
+                print(f'> {Emulator.get_code()}') if not Emulator.PAUSE else input(f'> {Emulator.get_code()}')
+            
+            elif opcode == 'PRIA':
+                print(f'> {Emulator.get_memory(Emulator.get_code())}') if not Emulator.PAUSE else input(f'> {Emulator.get_memory(Emulator.get_code())}')
