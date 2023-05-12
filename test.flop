@@ -1,0 +1,82 @@
+// comments
+
+for (i "= 0; i < 10; i++) {
+    print(i);
+}
+
+i := 0
+
+while (i < 50) {
+    print(i);
+    i++;
+}
+
+
+if (random) {
+    j := 4;
+} else {
+    j := 0;
+}
+
+print(j)
+
+func factorial(n) {
+    if (n <= 0) {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    }
+}
+
+@substitute
+@id=23547098
+func sum(a, b) {
+    t := 0;
+    return a + b;
+}
+variable = sum(a, b);
+
+t = 5
+s := sum(1, 2);
+print(s);
+print(t); //expect 5
+
+^^^ replaced by:
+
+t := 5
+23547098_t := 0;
+
+s := 1 + 2;
+print(s);
+print(t); //expect 5
+
+
+var array[10] = {}
+char[] a_string[10] = {'a', 11, 'c', 'd', e', 'f', 'g', 'h', 'i', 'j'}
+print(a_string[0].join(a_string[1]))
+
+____________________________________________________
+Memory:
+
+@define HEAPSTART 1000
+0 - @HEAPSTART [init to ~1000]
+
+
+malloc(alloc_amount) --> returns pointer to new var
+
+Code:
+
+MOV 0 <new_var_pointer_pos>
+CMATH + 0 <alloc_amount> 0
+
+____________________________________________________
+
+num_elems = random();
+num_elems *= 4;
+array := malloc(num_elems);
+
+____________________________________________________
+
+free(pointer, num_elems) --> sets all values to 0
+freeall() --> SET 0 @HEAPSTART
+
