@@ -9,8 +9,7 @@ class Lexer():
         self.lexer.add('OPEN_PAREN', r'\(')
         self.lexer.add('CLOSE_PAREN', r'\)')
         self.lexer.add('SEMI_COLON', r'\;')
-        # NUMBER must match floats, ints, positive, negative
-        self.lexer.add('NUMBER', r'-?\d*\.\d+|-?\d+')
+        self.lexer.add('NUMBER', r'\d+')
         self.lexer.add('SUM', r'\+')
         self.lexer.add('SUB', r'\-')
         self.lexer.add('MUL', r'\*')
@@ -36,5 +35,10 @@ class Lexer():
         self.lexer.add('OR', r'\|\|')
         self.lexer.add('NOT', r'\!')
         self.lexer.add('COMMA', r'\,')
+
+        self.lexer.ignore('\s+') # ignore spaces
     
-    
+    def get_lexer(self):
+        self._add_tokens()
+        return self.lexer.build()
+
