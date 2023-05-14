@@ -1,6 +1,6 @@
 // comments
 
-for (i "= 0; i < 10; i++) {
+for (i := 0; i < 10; i++) {
     print(i);
 }
 
@@ -27,12 +27,29 @@ func factorial(n) {
         return n * factorial(n - 1);
     }
 }
+____________________________________________________
+
+Artificial Stack:
+push(constant):
+    SET @temp0 <constant>
+    MOVR @temp0 @stack_pointer
+    CMATH + @stack_pointer 1 @stack_pointer
+
+push(variable):
+    MOVR <variable> @stack_pointer
+    CMATH + @stack_pointer 1 @stack_pointer
+
+pop(set_var_addr):
+    CMATH - @stack_pointer 1 @stack_pointer
+    MOV @stack_pointer <set_var_addr>
+
+____________________________________________________
 
 @substitute
 @id=23547098
 func sum(a, b) {
-    t := 0;
-    return a + b;
+    t := 4;
+    return a + b + t;
 }
 variable = sum(a, b);
 
@@ -44,10 +61,10 @@ print(t); //expect 5
 ^^^ replaced by:
 
 t := 5
-23547098_t := 0;
+23547098_t := 4;
 
-s := 1 + 2;
-print(s);
+s := 1 + 2 + 23547098_t;
+print(s); // expect 7
 print(t); //expect 5
 
 
