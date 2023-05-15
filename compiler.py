@@ -1,59 +1,82 @@
 class Compiler:
     """used to compile code into assembly code"""
 
+    reserved = {
+        'if': 'IF',
+        'then': 'THEN',
+        'else': 'ELSE',
+        'while': 'WHILE',
+        'do': 'DO',
+        'end': 'END',
+        'print': 'PRINT',
+        'for': 'FOR'
+    }
+
+
     @staticmethod
-    def parse(code):
-        cmds = []
+    def partition(code):
+        parts = []
         collected_statement = ''
         backslash = False
         bracket_stack = []
         line = 0
-        for char in code.strip():
+        for char in code:
+            print(bracket_stack)
             if char == '\n':
                 line += 1
             if backslash:
-                collected_statement += char
                 backslash = False
+                collected_statement += char
                 continue
             if char == '\\':
                 backslash = True
                 continue
-            if char == '"':
-                if bracket_stack and bracket_stack[-1] == '"':
-                    bracket_stack.pop()
-                else:
-                    bracket_stack.append('"')
-            if char == '[':
-                bracket_stack.append('[')
-            if char == ']':
-                if bracket_stack and bracket_stack[-1] == '[':
-                    bracket_stack.pop()
-                else:
-                    raise Exception(f'Unmatched bracket ] on line {line}')
             if char == '(':
+                if not bracket_stack:
+                    parts.append(collected_statement)
+                    collected_statement = ''
                 bracket_stack.append('(')
-            if char == ')':
-                if bracket_stack and bracket_stack[-1] == '(':
-                    bracket_stack.pop()
-                else:
-                    raise Exception(f'Unmatched bracket ) on line {line}')
-            if char == '{':
+            elif char == ')':
+                if not bracket_stack:
+                    raise Exception(f'Unexpected ")" at line {line}')
+                if bracket_stack[-1] in ['"', "'"]:
+                    collected_statement += char
+                    continue
+                if bracket_stack[-1] != '(':
+                    raise Exception(f'Unexpected ")" at line {line}')
+                bracket_stack.pop()
+            elif char == '[':
+                if not bracket_stack:
+                    parts.append(collected_statement)
+                    collected_statement = ''
+                bracket_stack.append('[')
+            elif char == ']':
+                if not bracket_stack:
+                    raise Exception(f'Unexpected "]" at line {line}')
+                if bracket_stack[-1] in ['"', "'"]:
+                    collected_statement += char
+                    continue
+                if bracket_stack[-1] != '[':
+                    raise Exception(f'Unexpected "]" at line {line}')
+                bracket_stack.pop()
+            elif char == '{':
+                if not bracket_stack:
+                    parts.append(collected_statement)
+                    collected_statement = ''
                 bracket_stack.append('{')
-            if char == '}':
-                if bracket_stack and bracket_stack[-1] == '{':
-                    bracket_stack.pop()
-                else:
-                    raise Exception(f'Unmatched bracket {"}"} on line {line}')
-            if char == ';' and not bracket_stack:
-                if collected_statement:
-                    cmds.append(collected_statement.strip())
-                    collected_statement = ''
-                continue
-            if char == '}' and not bracket_stack:
-                if collected_statement:
-                    cmds.append((collected_statement+'}').strip())
-                    collected_statement = ''
-                continue
+            elif char == '}':
+                if not bracket_stack:
+                    raise Exception(f'Unexpected "{"}"}" at line {line}')
+                if bracket_stack[-1] in ['"', "'"]:
+                    collected_statement += char
+                    continue
+                if bracket_stack[-1] != '{':
+                    raise Exception(f'Unexpected "{"}"}" at line {line}')
+                bracket_stack.pop()
             collected_statement += char
-            print(collected_statement)
-        return cmds
+            if char in ';)}]':
+                if not bracket_stack:
+                    parts.append(collected_statement)
+                    collected_statement = ''
+        parts = [part.strip() for part in parts if part.strip()]
+        return parts
