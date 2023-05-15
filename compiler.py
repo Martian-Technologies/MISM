@@ -21,7 +21,6 @@ class Compiler:
         bracket_stack = []
         line = 0
         for char in code:
-            print(bracket_stack)
             if char == '\n':
                 line += 1
             if backslash:
