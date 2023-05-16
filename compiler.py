@@ -19,63 +19,40 @@ class Compiler:
         collected_statement = ''
         backslash = False
         bracket_stack = []
-        line = 0
         for char in code:
             if char == '\n':
-                line += 1
-            if backslash:
-                backslash = False
-                collected_statement += char
                 continue
             if char == '\\':
                 backslash = True
                 continue
-            if char == '(':
+            if backslash:
+                collected_statement += '\\'
+                backslash = False
+                continue
+            semicol = False
+            if char in '([{':
                 if not bracket_stack:
-                    parts.append(collected_statement)
+                    parts.append(collected_statement.strip()) if collected_statement.strip() else None
                     collected_statement = ''
-                bracket_stack.append('(')
-            elif char == ')':
+                bracket_stack.append(char)
+            if char in ')]}':
                 if not bracket_stack:
-                    raise Exception(f'Unexpected ")" at line {line}')
-                if bracket_stack[-1] in ['"', "'"]:
-                    collected_statement += char
-                    continue
-                if bracket_stack[-1] != '(':
-                    raise Exception(f'Unexpected ")" at line {line}')
+                    raise Exception('bracket mismatch')
+                if char == ')' and bracket_stack[-1] != '(':
+                    raise Exception('bracket mismatch')
+                if char == ']' and bracket_stack[-1] != '[':
+                    raise Exception('bracket mismatch')
+                if char == '}' and bracket_stack[-1] != '{':
+                    raise Exception('bracket mismatch')
                 bracket_stack.pop()
-            elif char == '[':
                 if not bracket_stack:
-                    parts.append(collected_statement)
-                    collected_statement = ''
-                bracket_stack.append('[')
-            elif char == ']':
-                if not bracket_stack:
-                    raise Exception(f'Unexpected "]" at line {line}')
-                if bracket_stack[-1] in ['"', "'"]:
-                    collected_statement += char
-                    continue
-                if bracket_stack[-1] != '[':
-                    raise Exception(f'Unexpected "]" at line {line}')
-                bracket_stack.pop()
-            elif char == '{':
-                if not bracket_stack:
-                    parts.append(collected_statement)
-                    collected_statement = ''
-                bracket_stack.append('{')
-            elif char == '}':
-                if not bracket_stack:
-                    raise Exception(f'Unexpected "{"}"}" at line {line}')
-                if bracket_stack[-1] in ['"', "'"]:
-                    collected_statement += char
-                    continue
-                if bracket_stack[-1] != '{':
-                    raise Exception(f'Unexpected "{"}"}" at line {line}')
-                bracket_stack.pop()
+                    semicol = True
             collected_statement += char
-            if char in ';)}]':
-                if not bracket_stack:
-                    parts.append(collected_statement)
+            if char == ';' and not bracket_stack:
+                semicol = True
+            if semicol:
+                if collected_statement:
+                    parts.append(collected_statement.strip()) if collected_statement.strip() else None
                     collected_statement = ''
-        parts = [part.strip() for part in parts if part.strip()]
+                continue
         return parts
