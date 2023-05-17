@@ -14,7 +14,7 @@ if not os.path.exists(filename):
     exit(1)
 
 with open(filename, 'r') as f:
-    code = Compiler.partition(f.read())
+    code = Compiler.piece(Compiler.partition(f.read()))
 
 print(json.dumps(code, indent=4))
 

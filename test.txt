@@ -1,9 +1,11 @@
-for (i := 0; i < 10; i++) {
-    print(i);
-}
+func main() {
+    for (i := 0; i < 10; i++) {
+        print(i);
+    }
 
-j := 10;
-while (j > 0) {
-    print(j);
-    j--;
+    j := 10;
+    while (j > 0) {
+        print(j);
+        j--;
+    }
 }
