@@ -11,8 +11,17 @@ class Compiler:
         'print': 'PRINT',
         'for': 'FOR'
     }
+    # .lower()?
 
 
+
+
+
+    """
+    Please use functions to make code easier to read.
+    You have a horibal habit to make all the code in one giant block.
+    Please make helper functions. You should have a ton, you have one.
+    """
     @staticmethod
     def partition(code):
         parts = []
