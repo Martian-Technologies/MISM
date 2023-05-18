@@ -14,9 +14,8 @@ if not os.path.exists(filename):
     exit(1)
 
 with open(filename, 'r') as f:
-    code = Compiler.piece(Compiler.partition(f.read()))
-
-print(json.dumps(code, indent=4))
+    code = Compiler.compile(f.read())
+    print(json.dumps(code, indent=4))
 
 # fileName = 'test.mas'
 # if len(sys.argv) > 1:
