@@ -79,7 +79,7 @@ class Compiler:
     
     """
     Look how much better this is.
-    Please us functions.
+    Please use functions.
     """
 
     @staticmethod
