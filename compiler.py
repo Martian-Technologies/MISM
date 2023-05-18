@@ -25,8 +25,8 @@ class Compiler:
     @staticmethod
     def compile(inputCode):
         """
-        Compiles code into assembly
-        Input a string containing all the code that you want to compile
+        Compiles code into assembly.
+        Input a string containing all the code that you want to compile.
         """
         parsedCode = Compiler.partition(inputCode)
         piecedCode = Compiler.piece(parsedCode)
