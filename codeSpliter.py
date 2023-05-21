@@ -2,40 +2,47 @@ class CodeSpliter:
     @staticmethod
     def split(code, splitTypes = {";"}):
         print("splitting\n",code)
-        lines = CodeSpliter.splitOnTypesAndStuff(code, splitTypes)
-        chunks = CodeSpliter.splitChunks(lines)
+        lines = CodeSpliter.split_on_types_and_stuff(code, splitTypes)
+        chunks = CodeSpliter.split_chunks(lines)
         return chunks
         
     @staticmethod
-    def splitOnTypesAndStuff(code, splitTypes):
+    def split_on_types_and_stuff(code, split_types):
         lines = []
         line = ""
         i = 0
         while i < len(code):
             char = code[i]
-            if char in splitTypes:
-                if not (CodeSpliter.ifOnlyHas(line, {" "}) or len(line) == 0):
+            if char in split_types:
+                if not (CodeSpliter.if_only_has(line, {" "}) or len(line) == 0):
                     lines.append(line)
                 line = ""
             elif char == "{":
-                i, line = CodeSpliter.getBraceBlock(i, line, code)
+                i, line = CodeSpliter.get_brace_block(i, line, code)
                 lines.append(line)
                 line = ""
             elif char == "(":
-                i, line = CodeSpliter.getBraceBlock(i, line, code, "(", ")")
+                i, line = CodeSpliter.get_brace_block(i, line, code, "(", ")")
             elif char == "/" and i+1 < len(code):
                 if code[i+1] == "/":
-                    i = CodeSpliter.getNextCharPos(code, i)
+                    i = CodeSpliter.get_next_char_pos(code, i)
             elif char != "\n" and (len(line) > 0 or char != " "):
                 
                 line += char
             i += 1
         if len(line) != 0:
-            raise Exception(f'statement {line} {i} need to end with one of these chars {splitTypes}')
+            split_types_list = list(split_types)
+            if len(split_types_list) == 1:
+                split_types_readable = split_types_list[0]
+            elif len(split_types_list) == 2:
+                split_types_readable = f'{split_types_list[0]} or {split_types_list[1]}'
+            else:
+                split_types_readable = f'{", ".join(split_types_list[:-1])}, or {split_types_list[-1]}'
+            raise Exception(f'statement "{line}" on line {i} needs to end with {split_types_readable}')
         return lines
     
     @staticmethod
-    def splitChunks(lines):
+    def split_chunks(lines):
         allChucks = []
         for line in lines:
             chunks = []
@@ -44,45 +51,45 @@ class CodeSpliter:
             while i < len(line):
                 char = line[i]
                 if char == "{":
-                    if not (CodeSpliter.ifOnlyHas(chunk, {" "}) or len(chunk) == 0):
+                    if not (CodeSpliter.if_only_has(chunk, {" "}) or len(chunk) == 0):
                         chunks.append(chunk)
-                    i, block = CodeSpliter.getBraceBlock(i, "", line, includeBrace=False)
+                    i, block = CodeSpliter.get_brace_block(i, "", line, includeBrace=False)
                     chunk = CodeSpliter.split(block)
                     chunks.append(chunk)
                     chunk = ""
                 elif char == "(":
-                    if not (CodeSpliter.ifOnlyHas(chunk, {" "}) or len(chunk) == 0):
+                    if not (CodeSpliter.if_only_has(chunk, {" "}) or len(chunk) == 0):
                         chunks.append(chunk)
-                    i, block = CodeSpliter.getBraceBlock(i, "", line, "(", ")", False)
+                    i, block = CodeSpliter.get_brace_block(i, "", line, "(", ")", False)
                     block += ";"
                     chunk = CodeSpliter.split(block, {";", ","})
                     chunks.append(chunk)
                     chunk = ""
                 elif char == " ":
-                    if not (CodeSpliter.ifOnlyHas(chunk, {" "}) or len(chunk) == 0):
-                        chunk = CodeSpliter.splitOnOperators(chunk, chunks)
+                    if not (CodeSpliter.if_only_has(chunk, {" "}) or len(chunk) == 0):
+                        chunk = CodeSpliter.split_on_operators(chunk, chunks)
                         if len(chunk) != 0:
                             chunks.append(chunk)
                     chunk = ""
                 else:
                     chunk += char
                 i += 1
-            if not (CodeSpliter.ifOnlyHas(chunk, {" "}) or len(chunk) == 0):
-                chunk = CodeSpliter.splitOnOperators(chunk, chunks)
+            if not (CodeSpliter.if_only_has(chunk, {" "}) or len(chunk) == 0):
+                chunk = CodeSpliter.split_on_operators(chunk, chunks)
                 if len(chunk) != 0:
                     chunks.append(chunk)
             allChucks.append(chunks)
         return allChucks
     
     @staticmethod
-    def ifOnlyHas(string, chars):
+    def if_only_has(string, chars):
         for char in string:
             if not char in chars:
                 return False
         return True
     
     @staticmethod
-    def getBraceBlock(start, line, code, braceOpen = "{", braceClose = "}", includeBrace = True):
+    def get_brace_block(start, line, code, braceOpen = "{", braceClose = "}", includeBrace = True):
         if includeBrace:
             line += braceOpen
         braceCounter = 1
@@ -101,7 +108,7 @@ class CodeSpliter:
         return start, line
     
     @staticmethod
-    def stringContainStrings(string, strings):
+    def string_contain_strings(string, strings):
         for s in strings:
             i = string.find(s)
             if i != -1:
@@ -109,21 +116,21 @@ class CodeSpliter:
         return -1, ""
     
     @staticmethod
-    def splitOnOperators(chunk, chunks):
-        operator = ["=", ":=", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "++", "--", "==", ">", ">=", "<", "<="]
+    def split_on_operators(chunk, chunks):
+        operator = ["=", ":=", "+", "-", "*", "/", "%", "^", "+=", "-=", "*=", "/=", "++", "--", "==", ">", ">=", "<", "<="]
         operator.sort(key = len, reverse=True)
-        operatorLoc, operatorType = CodeSpliter.stringContainStrings(
+        operatorLoc, operatorType = CodeSpliter.string_contain_strings(
             chunk, operator)
         if operatorLoc != -1 and len(operatorType) != len(chunk):
             if len(chunk[0:operatorLoc]) != 0:
-                chunks.append(CodeSpliter.splitOnOperators(chunk[0:operatorLoc], chunks))
-            chunks.append(CodeSpliter.splitOnOperators(chunk[operatorLoc:operatorLoc + len(operatorType)], chunks))
-            return CodeSpliter.splitOnOperators(chunk[operatorLoc + len(operatorType):], chunks)
+                chunks.append(CodeSpliter.split_on_operators(chunk[0:operatorLoc], chunks))
+            chunks.append(CodeSpliter.split_on_operators(chunk[operatorLoc:operatorLoc + len(operatorType)], chunks))
+            return CodeSpliter.split_on_operators(chunk[operatorLoc + len(operatorType):], chunks)
         else:
             return chunk
         
     @staticmethod
-    def getNextCharPos(string, pos, char = "\n"):
+    def get_next_char_pos(string, pos, char = "\n"):
         while pos < len(string) and string[pos] != char:
             pos += 1
         return pos
