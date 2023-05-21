@@ -1,3 +1,5 @@
+from codeSpliter import CodeSpliter
+
 class Compiler:
     """used to compile code into assembly code"""
 
@@ -28,9 +30,12 @@ class Compiler:
         Compiles code into assembly.\n
         Input a string containing all the code that you want to compile.
         """
-        parsedCode = Compiler.partition(inputCode)
-        piecedCode = Compiler.piece(parsedCode)
-        return piecedCode
+        code = CodeSpliter.split(inputCode)
+        print(code)
+        return code
+        #parsedCode = Compiler.partition(inputCode)
+        #piecedCode = Compiler.piece(parsedCode)
+        #return piecedCode
 
 
     @staticmethod
