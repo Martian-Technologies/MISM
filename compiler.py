@@ -1,5 +1,68 @@
 from codeSpliter import CodeSpliter
 
+class Command(object):
+    def __init__(self, cmd):
+        self.cmd = cmd
+
+Program = list[Command]
+
+class Comparator(object):
+    def __init__(self, comparator: str):
+        if comparator not in ['<', '>', '==', '!=', '<=', '>=']:
+            raise Exception(f'comparator "{comparator}" is not a valid comparator')
+        self.comparator = comparator
+
+class Operator(object):
+    def __init__(self, operator: str):
+        if operator not in ['+', '-', '*', '/', '%', '^']:
+            raise Exception(f'operator "{operator}" is not a valid operator')
+        self.operator = operator
+
+class Variable(object):
+    def __init__(self, name: str):
+        self.name = name
+
+class DynamiclyAssignedVariable(Variable):
+    def __init__(self, name: str, pointer_addr: int):
+        super().__init__(name)
+        self.pointer_addr = pointer_addr
+
+class StaticlyAssignedVariable(Variable):
+    def __init__(self, name: str, addr: int):
+        super().__init__(name)
+        self.addr = addr
+
+class Value(object):
+    def __init__(self, value):
+        self.value = value
+
+class Condition(object):
+    def __init__(self, condition):
+        self.eval_tree = self.make_eval_tree(condition)
+    
+    def make_eval_tree(self, condition):
+        raise NotImplementedError()
+
+class Function(Command):
+    def __init__(self, name, inputs, code):
+        super().__init__('func')
+        self.name = name
+        self.inputs = inputs
+        self.code = code
+
+class Branch(Command):
+    def __init__(self, condition_code_pairs):
+        super().__init__('branch')
+        self.condition_code_pairs: dict[Condition, Program] = condition_code_pairs
+
+class WhileLoop(Command):
+    def __init__(self, condition: Condition, code: Program):
+        super().__init__('while')
+        self.condition: Condition = condition
+        self.code: Program = code
+
+
+
 class Compiler:
     """used to compile code into assembly code"""
 
@@ -39,7 +102,7 @@ class Compiler:
         piecedCode = []
         while i < len(parsedCode):
             codeLine = parsedCode[i]
-            command = Compiler.makeCommand(codeLine)
+            command = Compiler.make_command(codeLine)
             if command["type"] in ['else', 'elif']:
                 if i > 0:
                     if piecedCode[i-1]["type"] in ['if', 'elif']:
@@ -54,7 +117,7 @@ class Compiler:
         return piecedCode
 
     @staticmethod
-    def makeCommand(line):
+    def make_command(line):
         command = {}
         print(line)
         if line[0] == 'for':
@@ -64,9 +127,9 @@ class Compiler:
                 raise Exception(f"for statement {line} does not have: 'init', 'condition', 'increment'")
             command = {
                 'type': 'for',
-                'init': Compiler.makeCommand(line[1][0]),
+                'init': Compiler.make_command(line[1][0]),
                 'condition': line[1][1],
-                'increment': Compiler.makeCommand(line[1][2]),
+                'increment': Compiler.make_command(line[1][2]),
                 'code': Compiler.piece(line[2])
             }
         elif line[0] == 'if':

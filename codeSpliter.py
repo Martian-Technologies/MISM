@@ -26,7 +26,6 @@ class CodeSpliter:
                 if code[i+1] == "/":
                     i = CodeSpliter.get_next_char_pos(code, i)
             elif char != "\n" and (len(line) > 0 or char != " "):
-                
                 line += char
             i += 1
         if len(line) != 0:
