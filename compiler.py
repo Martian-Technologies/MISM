@@ -6,6 +6,13 @@ class Command(object):
 
 Program = list[Command]
 
+class Expression(object):
+    def __init__(self, expression):
+        self.eval_tree = self.make_eval_tree(expression)
+    
+    def make_eval_tree(self, expression):
+        raise NotImplementedError()
+
 class Comparator(object):
     def __init__(self, comparator: str):
         if comparator not in ['<', '>', '==', '!=', '<=', '>=']:
@@ -61,6 +68,10 @@ class WhileLoop(Command):
         self.condition: Condition = condition
         self.code: Program = code
 
+class Print(Command):
+    def __init__(self, expression: Expression):
+        super().__init__('print')
+        self.expression: Expression = expression
 
 
 class Compiler:
