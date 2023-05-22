@@ -1,7 +1,6 @@
 class CodeSpliter:
     @staticmethod
     def split(code, splitTypes = {";"}):
-        print("splitting\n",code)
         lines = CodeSpliter.split_on_types_and_stuff(code, splitTypes)
         chunks = CodeSpliter.split_chunks(lines)
         return chunks
@@ -117,16 +116,21 @@ class CodeSpliter:
     
     @staticmethod
     def split_on_operators(chunk, chunks):
-        operator = ["=", ":=", "+", "-", "*", "/", "%", "^", "+=", "-=", "*=", "/=", "++", "--", "==", ">", ">=", "<", "<="]
-        operator.sort(key = len, reverse=True)
+        operators = ["=", ":=", "+", "-", "*", "/", "%", "^", "+=", "-=", "*=", "/=", "++", "--", "==", ">", ">=", "<", "<="]
+        operators.sort(key = len, reverse=True)
         operatorLoc, operatorType = CodeSpliter.string_contain_strings(
-            chunk, operator)
+            chunk, operators)
         if operatorLoc != -1 and len(operatorType) != len(chunk):
             if len(chunk[0:operatorLoc]) != 0:
                 chunks.append(CodeSpliter.split_on_operators(chunk[0:operatorLoc], chunks))
-            chunks.append(CodeSpliter.split_on_operators(chunk[operatorLoc:operatorLoc + len(operatorType)], chunks))
+            operator = CodeSpliter.split_on_operators(chunk[operatorLoc:operatorLoc + len(operatorType)], chunks)
+            if operator == ':=':
+                operator = '='
+            chunks.append(operator)
             return CodeSpliter.split_on_operators(chunk[operatorLoc + len(operatorType):], chunks)
         else:
+            if chunk == ':=':
+                chunk = '='
             return chunk
         
     @staticmethod
