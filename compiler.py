@@ -13,10 +13,6 @@ class Compiler:
         'print': 'PRINT',
         'for': 'FOR'
     }
-    # .lower()?
-
-
-
 
     """
     Please use functions to make code easier to read.
@@ -144,7 +140,10 @@ class Compiler:
                 'code': None
             }
         else:
-            raise Exception(f'unknown command "{part}"')
+            current_command = {
+                'type': 'expression',
+                'expression': [part]
+            }
         return current_command
 
     @staticmethod
