@@ -1,18 +1,25 @@
 import json
 from codeSpliter import CodeSpliter
 
+central_index = 0
+def get_index():
+    global central_index
+    central_index += 1
+    return central_index - 1
+
 class Command(object):
     def __init__(self, cmd):
         self.cmd = cmd
 
 Program = list[Command]
 
-class Expression(object):
-    def __init__(self, expression):
-        self.eval_tree = self.make_eval_tree(expression)
-    
-    def make_eval_tree(self, expression):
-        raise NotImplementedError()
+class Variable(object):
+    def __init__(self, name: str):
+        self.name = name
+
+class Value(object):
+    def __init__(self, value):
+        self.value = value
 
 class Comparator(object):
     def __init__(self, comparator: str):
@@ -20,43 +27,39 @@ class Comparator(object):
             raise Exception(f'comparator "{comparator}" is not a valid comparator')
         self.comparator = comparator
 
+Instance = Variable | Value
+Condition = tuple[Instance, Comparator, Instance]
+
+class Nop(Command):
+    def __init__(self):
+        super().__init__('nop')
+
 class Operator(object):
     def __init__(self, operator: str):
         if operator not in ['+', '-', '*', '/', '%', '^']:
             raise Exception(f'operator "{operator}" is not a valid operator')
         self.operator = operator
 
-class Variable(object):
-    def __init__(self, name: str):
-        self.name = name
 
 class DynamiclyAssignedVariable(Variable):
     def __init__(self, name: str, pointer_addr: int):
         super().__init__(name)
         self.pointer_addr = pointer_addr
+        self.pointer_name = f'var_dyn_{name}_{get_index()}'
 
 class StaticlyAssignedVariable(Variable):
     def __init__(self, name: str, addr: int):
         super().__init__(name)
         self.addr = addr
+        self.pointer_name = f'var_dyn_{name}_{get_index()}'
 
-class Value(object):
-    def __init__(self, value):
-        self.value = value
-
-class Condition(object):
-    def __init__(self, condition):
-        self.eval_tree = self.make_eval_tree(condition)
-    
-    def make_eval_tree(self, condition):
-        raise NotImplementedError()
 
 class Function(Command):
     def __init__(self, name, inputs, code):
         super().__init__('func')
-        self.name = name
-        self.inputs = inputs
-        self.code = code
+        self.name: str = name
+        self.inputs: list[Variable] = inputs
+        self.code: Program = code
 
 class Branch(Command):
     def __init__(self, condition_code_pairs):
@@ -66,14 +69,26 @@ class Branch(Command):
 class WhileLoop(Command):
     def __init__(self, condition: Condition, code: Program):
         super().__init__('while')
+        self.init = Nop()
         self.condition: Condition = condition
         self.code: Program = code
 
-class Print(Command):
-    def __init__(self, expression: Expression):
-        super().__init__('print')
-        self.expression: Expression = expression
+class ForLoop(WhileLoop):
+    def __init__(self, init: Command, condition: Condition, step: Command, code: Program):
+        super().__init__(condition, code)
+        self.init: Command = init
+        self.code.append(step)
 
+class Print(Command):
+    def __init__(self, value: Instance):
+        super().__init__('print')
+        self.value: Instance = value
+
+class Assignment(Command):
+    def __init__(self, variable: Variable, value: Instance):
+        super().__init__('assign')
+        self.variable: Variable = variable
+        self.value: Instance = value
 
 class Compiler:
     """used to compile code into assembly code"""
