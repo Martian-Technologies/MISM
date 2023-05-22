@@ -1,3 +1,4 @@
+import json
 from codeSpliter import CodeSpliter
 
 class Command(object):
@@ -101,9 +102,7 @@ class Compiler:
         Input a string containing all the code that you want to compile.
         """
         code = CodeSpliter.split(inputCode)
-        print(code)
         piecedCode = Compiler.piece(code)
-        print(piecedCode)
         return piecedCode
         #return piecedCode
 
@@ -111,6 +110,7 @@ class Compiler:
     def piece(parsedCode):
         i = 0
         piecedCode = []
+        functions = []
         while i < len(parsedCode):
             codeLine = parsedCode[i]
             command = Compiler.make_command(codeLine)
@@ -122,15 +122,17 @@ class Compiler:
                         raise Exception(f'{command.type} needs an if or elif statment before it')
                 else:
                     raise Exception(f'{command.type} needs an if or elif statment before it')
+            elif command["type"] == "function":
+                functions.append(command)
             else:
                 piecedCode.append(command)
             i += 1
+        print(json.dumps(functions, indent=4))
         return piecedCode
 
     @staticmethod
     def make_command(line):
         command = {}
-        print(line)
         if line[0] == 'for':
             if len(line) != 3:
                 raise Exception(f"for statement {line} does not have: 'for', '(init, condition, increment)', 'code'")
@@ -203,10 +205,11 @@ class Compiler:
         elif line[1] in ['=', '+=', '-=', '*=', '/=']:
             if len(line) != 3:
                 raise Exception(f"statement {line} does not have: 'var', 'operator', 'expression'")
+            print(line)
             command = {
                 'type': line[1],
                 'var': line[0], # idk what to call this. TODO: help me name this
-                'expression': line[2:]
+                'expression': line[2]
             }
         elif line[1] in ['++', '--']:
             if len(line) != 2:

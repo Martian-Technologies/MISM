@@ -6,7 +6,7 @@ class CodeSpliter:
         return chunks
         
     @staticmethod
-    def split_on_types_and_stuff(code, split_types):
+    def split_on_types_and_stuff(code, split_types):        
         lines = []
         line = ""
         i = 0
@@ -36,7 +36,7 @@ class CodeSpliter:
                 split_types_readable = f'{split_types_list[0]} or {split_types_list[1]}'
             else:
                 split_types_readable = f'{", ".join(split_types_list[:-1])}, or {split_types_list[-1]}'
-            raise Exception(f'statement "{line}" on line {i} needs to end with {split_types_readable}')
+            raise Exception(f'statement "{line}" on char {i} needs to end with {split_types_readable}')
         return lines
     
     @staticmethod
@@ -94,15 +94,14 @@ class CodeSpliter:
         while braceCounter > 0:
             start += 1
             if start >= len(code):
-                raise Exception(f"did not close curly brace type {braceOpen}{braceClose}")
+                raise Exception(f"did not close curly brace type {braceOpen}{braceClose} on line {code}")
             char = code[start]
             if char == braceOpen:
                 braceCounter += 1
             elif char == braceClose:
                 braceCounter -= 1
-            if(char != "\n"):
-                if includeBrace or braceCounter > 0:
-                    line += char
+            if includeBrace or braceCounter > 0:
+                line += char
         return start, line
     
     @staticmethod
