@@ -1,4 +1,16 @@
+boo := 3; //staticly defined variable
+
 func main() {
+    bar := 9 //dynamically defined variable
+
+    print(boo); //compiles to PRIA @var_stat_boo
+
+    print(bar); //compiles to RMOV @var_dyn_bar @temp_0
+                //            PRIA @temp_0
+
+    boo = bar   //compiles to RMOV @var_dyn_bar @var_stat_boo
+    bar = boo   //compiles to MOVR @var_stat_boo @var_dyn_bar
+
     for (i := 0; i < 10; i++) {
         if (i%2 == 0){
             print("odd");
