@@ -7,9 +7,23 @@ def get_index():
     central_index += 1
     return central_index - 1
 
+class Namespace(object):
+    def __init__(self):
+        # name / caller pairs
+        self.state: list[tuple[str, object]] = []
+    
+    def add(self, name: str, parent: object):
+        if name in self.state:
+            joined = ' -> '.join([i[0] for i in (self.state+[name])])
+            raise Exception(f'recursion detected "{name}" calls inside itself via:\n')
+        self.state.append(name, parent)
+
 class Command(object):
     def __init__(self, cmd):
         self.cmd = cmd
+    
+    def translate(self, namespace: Namespace):
+        return []
 
 Program = list[Command]
 
@@ -33,6 +47,9 @@ Condition = tuple[Instance, Comparator, Instance]
 class Nop(Command):
     def __init__(self):
         super().__init__('nop')
+    
+    def translate(self, namespace: Namespace):
+        return []
 
 class Operator(object):
     def __init__(self, operator: str):
@@ -54,9 +71,8 @@ class StaticlyAssignedVariable(Variable):
         self.pointer_name = f'var_dyn_{name}_{get_index()}'
 
 
-class Function(Command):
+class Function(object):
     def __init__(self, name, inputs, code):
-        super().__init__('func')
         self.name: str = name
         self.inputs: list[Variable] = inputs
         self.code: Program = code
@@ -72,6 +88,19 @@ class WhileLoop(Command):
         self.init = Nop()
         self.condition: Condition = condition
         self.code: Program = code
+    
+    def translate(self, namespace: Namespace):
+        self.break_jump = f'while_break_{get_index()}'
+        self.start_jump = f'while_start_{get_index()}'
+        out = []
+        out += self.init.translate(namespace)
+        out.append(f'JMIF {self.condition.translate(namespace)} ~{self.start_jump}')
+        out.append(f'JUMP ~{self.break_jump}')
+        out.append(f'{self.start_jump}:')
+        out += [i.translate(namespace) for i in self.code]
+        out.append(f'JUMP ~{self.start_jump}')
+        out.append(f'{self.break_jump}:')
+        return out
 
 class ForLoop(WhileLoop):
     def __init__(self, init: Command, condition: Condition, step: Command, code: Program):
@@ -89,6 +118,38 @@ class Assignment(Command):
         super().__init__('assign')
         self.variable: Variable = variable
         self.value: Instance = value
+
+class Modification(Command):
+    def __init__(self, variable: Variable, operator: Operator, value: Instance):
+        super().__init__('modify')
+        self.variable: Variable = variable
+        self.operator: Operator = operator
+        self.value: Instance = value
+
+class Definition(Command):
+    def __init__(self, variable: Variable, value: Instance):
+        super().__init__('define')
+        self.variable: Variable = variable
+        self.value: Instance = value
+
+class Return(Command):
+    def __init__(self, value: Instance):
+        super().__init__('return')
+        self.value: Instance = value
+
+class Continue(Command):
+    def __init__(self):
+        super().__init__('continue')
+
+class Break(Command):
+    def __init__(self):
+        super().__init__('break')
+
+class FunctionCall(Command):
+    def __init__(self, name: str, inputs: list[Instance]):
+        super().__init__('call')
+        self.name: str = name
+        self.inputs: list[Instance] = inputs
 
 class Compiler:
     """used to compile code into assembly code"""
