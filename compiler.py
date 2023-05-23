@@ -29,9 +29,9 @@ class Compiler:
         code = CodeSpliter.split(inputCode)
         print(code)
         return code
-        #parsedCode = Compiler.partition(inputCode)
-        #piecedCode = Compiler.piece(parsedCode)
-        #return piecedCode
+        # parsedCode = Compiler.partition(inputCode)
+        # piecedCode = Compiler.piece(parsedCode)
+        # return piecedCode
 
 
     @staticmethod
