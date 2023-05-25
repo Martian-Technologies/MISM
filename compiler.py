@@ -198,7 +198,6 @@ class Compiler:
                 else:
                     raise Exception(f'{command.type} needs an if or elif statment before it')
             elif command["type"] == "function":
-                print('function setting', piecedCode[len(piecedCode)-1])
                 if piecedCode[len(piecedCode)-1]['type'] == 'function setting':
                     if piecedCode[len(piecedCode)-1]['text'] == 'replace':
                         command['replace'] = True
@@ -310,7 +309,6 @@ class Compiler:
             if line[1] in ['=', '+=', '-=', '*=', '/=']:
                 if len(line) != 3:
                     raise Exception(f"statement {line} does not have: 'var', 'operator', 'expression'")
-                print(line)
                 command = {
                     'type': line[1],
                     'var': line[0], # idk what to call this. TODO: help me name this
@@ -369,13 +367,10 @@ class Compiler:
             raise Exception("can not leave condition blank")
         while len(expression) == 1 and type(expression[0]) == list:
             expression = expression[0]
-        print('------ make_condition ------')
-        print(expression)
         expressionSide1 = []
         expressionSide2 = []
         comparator = None
         for i in expression:
-            print(i)
             if i in ['<', '>', '==', '!=', '<=', '>=']:
                 comparator = i
             elif comparator == None:
