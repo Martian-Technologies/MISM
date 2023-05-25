@@ -1,28 +1,29 @@
-boo := 3; //staticly defined variable
+boo := 3;
 
-func main() {
-    bar := 9;
+@replace
+func main(bar) {
 
-    print(boo); //compiles to PRIA @var_stat_boo
+    print(boo);
 
-    print(bar); //compiles to RMOV @var_dyn_bar @temp_0
-                //            PRIA @temp_0
+    print(bar);
 
-    boo = bar;   //compiles to RMOV @var_dyn_bar @var_stat_boo
-    bar = boo;   //compiles to MOVR @var_stat_boo @var_dyn_bar
+    boo = bar;
+    bar = boo;
 
     for (i := 0; i < 10; i++) {
         if (i%2 == 0){
-            print("odd");
+            print(1);
         } else {
-            print("even");
+            print(0);
         }
         print(i+1);
     }
-
+    return;
     j := 10;
     while (j > 0) {
         print(j);
         j--;
     }
 }
+
+main(3+5);
