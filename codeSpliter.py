@@ -122,13 +122,9 @@ class CodeSpliter:
             if len(chunk[0:operatorLoc]) != 0:
                 chunks.append(CodeSpliter.split_on_operators(chunk[0:operatorLoc], chunks))
             operator = CodeSpliter.split_on_operators(chunk[operatorLoc:operatorLoc + len(operatorType)], chunks)
-            if operator == ':=':
-                operator = '='
             chunks.append(operator)
             return CodeSpliter.split_on_operators(chunk[operatorLoc + len(operatorType):], chunks)
         else:
-            if chunk == ':=':
-                chunk = '='
             return chunk
         
     @staticmethod
