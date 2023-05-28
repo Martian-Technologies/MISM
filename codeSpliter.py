@@ -127,10 +127,9 @@ class CodeSpliter:
     
     @staticmethod
     def split_on_operators(chunk, chunks):
-        operators = ['=', ':=', '+', '-', '*', '/', '%', '^', '+=', '-=', '*=', '/=', '++', '--', '==', '>', '>=', '<', '<=']
+        operators = ['=', '+', '-', '*', '/', '%', '^', '+=', '-=', '*=', '/=', '++', '--', '==', '>', '>=', '<', '<=']
         operators.sort(key = len, reverse=True)
-        operatorLoc, operatorType = CodeSpliter.string_contain_strings(
-            chunk, operators)
+        operatorLoc, operatorType = CodeSpliter.string_contain_strings(chunk, operators)
         if operatorLoc != -1 and len(operatorType) != len(chunk):
             if len(chunk[0:operatorLoc]) != 0:
                 chunks.append(CodeSpliter.split_on_operators(chunk[0:operatorLoc], chunks))
