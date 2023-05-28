@@ -1,3 +1,6 @@
+if __name__ == "__main__":
+    import main
+
 class CodeSpliter:
     @staticmethod
     def split(code, splitTypes = {';'}):

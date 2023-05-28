@@ -4,6 +4,9 @@ import os
 import operator
 from assembler import Assembler
 
+if __name__ == "__main__":
+    import main
+
 class Emulator:
     PAUSE = False
     DEBUG = False

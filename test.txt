@@ -3,14 +3,14 @@ boo := 3;
 @replace
 func main(bar) {
 
-    print(boo);
+    print(((boo)));
 
     print(bar);
 
-    boo = bar;
+    boo = (bar * 2 + (1 - bar));
     bar = boo;
-
-    for (i := 0; i < 10; i++) {
+    boo += (1+5);
+    for (i := 0; i < 10 + 0; i++) {
         if (i%2 == 0){
             print(1);
         } else {
