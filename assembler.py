@@ -27,6 +27,7 @@ class Assembler:
         'RMR',
         'PRI',
         'PRIA',
+        'RAW',
     ]
 
     alias_table = {
@@ -391,7 +392,16 @@ class Assembler:
                 addr = Assembler.parse_value(tokens[1], line)
 
                 pass4.append({'line': line['line'], 'content': [13, addr]})
-
+            
+            elif Assembler.replacements[tokens[0].lower()] == 'RAW':
+                if len(tokens) == 1:
+                    Assembler.error(f'invalid RAW instruction "{line["og"]}" on line {line["line"]}. Expected at least 1 token, got {len(tokens)}.')
+                content = []
+                for token in tokens[1:]:
+                    value = Assembler.parse_value(token, line)
+                    content.append(value)
+                pass4.append({'line': line['line'], 'content': content})
+                
             else:
                 Assembler.error(f'invalid instruction "{line["og"]}" on line {line["line"]}')
 

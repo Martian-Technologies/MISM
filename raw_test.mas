@@ -1,0 +1,8 @@
+set 4 1
+set 5 10
+start:
+    pria 4
+    raw 4 0 4 1 4
+    jmif equ 4 5 !end
+    raw 5 0 !start
+end:
