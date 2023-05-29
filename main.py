@@ -16,7 +16,11 @@ def run():
 
     with open(filename, 'r') as f:
         code = Compiler.compile(f.read())
-        #print(json.dumps(code, indent=4))
+        print(json.dumps(code, indent=4))
+        code = Assembler.run(code, doPrints = False)
+        Emulator.run(code)
+
+    # Emulator.run(code)
 
     # fileName = 'test.mas'
     # if len(sys.argv) > 1:

@@ -1,6 +1,7 @@
 import json
 from codeSpliter import CodeSpliter
 from piecer import Piecer
+from assemblyBuilder import AssemblyBuilder
 
 if __name__ == "__main__":
     import main
@@ -17,4 +18,6 @@ class Compiler:
         code = CodeSpliter.split(inputCode)
         piecedCode = Piecer.piece(code)
         print('piecedCode:', json.dumps(piecedCode, indent=4))
-        return
+        assemblyCode = AssemblyBuilder.make_assembly(piecedCode)
+        print('assemblyCode:', json.dumps(assemblyCode, indent=4))
+        return assemblyCode

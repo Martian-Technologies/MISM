@@ -1,29 +1,15 @@
-boo = 3;
-
 @replace
-func main(bar) {
-
-    print(((boo)));
-
-    print(bar);
-
-    boo = (bar * 2 + (1 - bar));
-    bar = boo;
-    boo += (1+5);
-    for (i = 0; i < 10 + 0; i++) {
-        if (i%2 == 0){
-            print(1);
-        } else {
-            print(0);
-        }
-        print(i+1);
+func test(foo) {
+    if (foo >= 10) {
+        foo = 0;
+    } else {
+        foo = 1;
     }
-    return;
-    j = 10;
-    while (j > 0) {
-        print(j);
-        j--;
-    }
+    return(foo);
 }
 
-main(3+5);
+print(test(9));
+print(test(3));
+print(test(100));
+print(test(11));
+print(test(10));
