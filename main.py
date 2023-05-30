@@ -26,6 +26,7 @@ def run():
     Emulator.run(code)
 
     # fileName = 'test.mas'
+    
     # if len(sys.argv) > 1:
     #     fileName = sys.argv[1]
 
