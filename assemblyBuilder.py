@@ -172,14 +172,6 @@ class AssemblyBuilder:
     }
     
     @staticmethod
-    def is_number(s):
-        try:
-            float(s)
-            return True
-        except ValueError:
-            return False
-    
-    @staticmethod
     def getVarID(name):
         if not AssemblyBuilder.isValidVarName(name):
             raise Exception(f"var name {name} is not a valid var name")
@@ -188,6 +180,14 @@ class AssemblyBuilder:
         else:
             AssemblyBuilder.vars[name] = len(AssemblyBuilder.vars.keys())
             return AssemblyBuilder.vars[name]
+    
+    @staticmethod
+    def is_number(s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
     
     @staticmethod
     def isValidVarName(name):

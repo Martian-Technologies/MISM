@@ -6,24 +6,19 @@ from emulator import Emulator
 from compiler import Compiler
 
 def run():
-    filename = 'raw_test.mas'
+    filename = 'test.txt'
     if len(sys.argv) > 1:
         filename = sys.argv[1]
 
     if not os.path.exists(filename):
         print(f'Error: file "{filename}" not found')
         exit(1)
-    with open(filename, 'r') as f:
-        code = f.readlines()
-        code = Assembler.run(code)
-    print(code)
-    # with open(filename, 'r') as f:
-    #     code = Compiler.compile(f.read())
-    #     print(json.dumps(code, indent=4))
-    #     code = Assembler.run(code, doPrints = False)
-    #     Emulator.run(code)
 
-    Emulator.run(code)
+    with open(filename, 'r') as f:
+        code = Compiler.compile(f.read())
+        code = Assembler.run(code, doPrints = False)
+        Emulator.run(code)
+
 
     # fileName = 'test.mas'
     

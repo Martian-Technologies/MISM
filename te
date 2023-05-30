@@ -1,0 +1,80 @@
+[
+    {
+        "type": "=",
+        "var": "test:1_USR_foo",
+        "expression": "test:1_test:0_USR_foo"
+    },
+    {
+        "type": "define",
+        "var": "test:1_USR_return_test:0"    
+    },
+    {
+        "type": "if",
+        "comparator": ">=",
+        "expressionLeft": "test:1_USR_foo",  
+        "expressionRight": "10",
+        "code": [
+            {
+                "type": "=",
+                "var": "test:1_USR_foo",     
+                "expression": "0"
+            }
+        ],
+        "else": {
+            "type": "else",
+            "code": [
+                {
+                    "type": "=",
+                    "var": "test:1_USR_foo",
+                    "expression": "1"
+                }
+            ]
+        }
+    },
+    {
+        "type": "=",
+        "var": "test:1_USR_return_test:0",
+        "expression": "test:1_USR_foo"
+    },
+    {
+        "type": "=",
+        "var": "test:0_USR_foo",
+        "expression": "2"
+    },
+    {
+        "type": "define",
+        "var": "test:0_USR_return_test:0"
+    },
+    {
+        "type": "if",
+        "comparator": ">=",
+        "expressionLeft": "test:0_USR_foo",
+        "expressionRight": "10",
+        "code": [
+            {
+                "type": "=",
+                "var": "test:0_USR_foo",
+                "expression": "0"
+            }
+        ],
+        "else": {
+            "type": "else",
+            "code": [
+                {
+                    "type": "=",
+                    "var": "test:0_USR_foo",
+                    "expression": "1"
+                }
+            ]
+        }
+    },
+    {
+        "type": "=",
+        "var": "test:0_USR_return_test:0",
+        "expression": "test:0_USR_foo"
+    },
+    {
+        "type": "print",
+        "expression": "test:1_USR_foo"
+    }
+]

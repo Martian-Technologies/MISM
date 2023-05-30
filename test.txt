@@ -8,8 +8,4 @@ func test(foo) {
     return(foo);
 }
 
-print(test(9));
-print(test(3));
-print(test(100));
-print(test(11));
-print(test(10));
+print(test(test(2)));

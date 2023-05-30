@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
 class Piecer:
     @staticmethod
-    def piece(parsedCode, outsideFunctions = {}, functionNames = []):
+    def piece(parsedCode, outsideFunctions = {}, functionNames = [], isFunction = False):
         functions = {}
         i = 0
         piecedCode = []
@@ -43,6 +43,7 @@ class Piecer:
             else:
                 piecedCode.append(command)
             i += 1
+        piecedCode = Piecer.replace_var_names(piecedCode, 'USR')
         piecedCode = Piecer.replace_functions(piecedCode, outsideFunctions.copy() | functions.copy())
         for name in list(functions.keys()).copy():
             if functions[name]['replace']:
@@ -119,7 +120,7 @@ class Piecer:
                 'type': 'function',
                 'name': line[1],
                 'replace': False,
-                'params': line[2],
+                'params': Piecer.replace_var_names(line[2], 'USR'),
                 'code': None,
                 'return': None
             }
@@ -191,7 +192,7 @@ class Piecer:
         else:
             raise Exception(f"could not find command {line}")
         return command
-    
+
     @staticmethod
     def make_args(args, functions, functionNames):
         newArgs = []
@@ -218,7 +219,7 @@ class Piecer:
             'type': 'expression',
             'expression': expression
             }
-    
+
     def make_condition(expression, functions, functionNames):
         if len(expression) == 0:
             raise Exception("can not leave condition blank")
@@ -261,7 +262,7 @@ class Piecer:
         lineNumber = 0
         while lineNumber < len(code):
             line = code[lineNumber]
-            code = Piecer.scan_expressions_func(line, code, functions, lineNumber)
+            code, lineNumber = Piecer.scan_expressions_func(line, code, functions, lineNumber)
             lineNumber += 1
         return code
     
@@ -271,38 +272,69 @@ class Piecer:
             i = 0
             while i < len(statements.keys()):
                 k = list(statements.keys())[i]
-                if ('expression' in k) or ('condition' in k):
-                    code = Piecer.scan_expressions_func(statements[k], code, functions, lineNumber, statements, k)
+                if ('expression' in k) or ('condition' in k) or ('args' in k):
+                    code, lineNumber = Piecer.scan_expressions_func(statements[k], code, functions, lineNumber, statements, k)
                 i += 1
             if statements['type'] == 'function call':
                 if parentStatement != None:
-                    parentStatement[key] = VariableNameGenerator.get_return_name(statements['name'])
-                    code = Piecer.add_function(lineNumber, code, statements, functions[statements['name']], True)
+                    VariableNameGenerator.returnNameID += 1
+                    code, returnName, lineNumber = Piecer.add_function(lineNumber, code, statements, functions[statements['name']], True)
+                    parentStatement[key] = returnName
         elif type(statements) == list:
             i = 0
             while i < len(statements):
                 statement = statements[i]
-                code = Piecer.scan_expressions_func(statement, code, functions, lineNumber, statements, i)
+                code, lineNumber = Piecer.scan_expressions_func(statement, code, functions, lineNumber, statements, i)
                 i += 1
-        return code
+        return code, lineNumber
 
     @staticmethod
     def add_function(lineNumber: int, code: list, line: dict, function: dict, doReturn: bool = False):
-        argI: int = 0
         funcCode: list = copy.deepcopy(function['code'])
-        funcCode = Piecer.replaceVarNames(funcCode)
+        argI: int = 0
         for arg in line['args']:
-            funcCode.insert(0, {'type': '=', 'var': function['params'][argI][0], 'expression': arg})
+            funcCode.insert(1, {'type': '=', 'var': function['params'][argI][0], 'expression': {'temp': arg}})
             argI += 1
+        funcCode = Piecer.replace_var_names(funcCode, f"{function['name']}:{VariableNameGenerator.get_new_func_ID()}", deepScan=True)
+        argI = 0
+        while argI < len(line['args']):
+            funcCode[1 + argI]['expression'] = funcCode[1 + argI]['expression']['temp']
+            argI += 1
+        returnName = None
+        if doReturn:
+            returnName = funcCode[0]['var']
+            print(returnName)
+        print('add_function')
+        print(funcCode)
         if not doReturn:
             del code[lineNumber]
             code = code[:lineNumber] + funcCode + code[lineNumber:]
         else:
             code = code[:lineNumber] + funcCode + code[lineNumber:]
-        return code
+        return code, returnName, lineNumber + len(funcCode)
 
     @staticmethod
-    def replaceVarNames(code, start = ''):
-        for line in code:
-            pass #TODO: add code here
+    def replace_var_names(code, start = '', deepScan = False):
+        return Piecer.scan_replace_var_names(code, start, deepScan)
+
+    @staticmethod
+    def scan_replace_var_names(code, start, deepScan):
+        if type(code) == dict:
+            i = 0
+            while i < len(code.keys()):
+                k = list(code.keys())[i]
+                if ('expression' in k) or ('condition' in k) or ('args' in k) or ('var' in k):
+                    code[k] = Piecer.scan_replace_var_names(code[k], start, deepScan)
+                elif deepScan:
+                    if ('code' in k) or ('else' in k):
+                        code[k] = Piecer.scan_replace_var_names(code[k], start, deepScan)
+                i+=1
+        elif type(code) == list:
+            i = 0
+            while i < len(code):
+                code[i] = Piecer.scan_replace_var_names(code[i], start, deepScan)
+                i += 1
+        else:
+            if VariableNameGenerator.isValidVarName(code):
+                code = f"{start}_{code}"
         return code
