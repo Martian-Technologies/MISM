@@ -51,6 +51,7 @@ class Assembler:
         'rmod': ['r%'],
         'rpow': ['r^'],
         'equ': ['='],
+        'equ': ['=='],
         'neq': ['!='],
         'lss': ['<'],
         'leq': ['<='],

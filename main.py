@@ -6,7 +6,7 @@ from emulator import Emulator
 from compiler import Compiler
 
 def run():
-    filename = 'test.txt'
+    filename = 'test.itc'
     if len(sys.argv) > 1:
         filename = sys.argv[1]
 
