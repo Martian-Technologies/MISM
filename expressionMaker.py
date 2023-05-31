@@ -1,5 +1,5 @@
 import json
-from varNameGen import VariableNameGenerator
+from VarNameManager import VariableNameManager
 
 if __name__ == "__main__":
     import main
@@ -239,7 +239,7 @@ class ExpressionMaker:
                     block[0] = block[0]['expression']
                 return [], block[0]
             else:
-                var = VariableNameGenerator.gen_name()
+                var = VariableNameManager.gen_name()
                 code, value = ExpressionMaker.make_expression(block, 'any')
                 command = {'type': '=', 'var': var, 'expression': value}
                 code.append(command)
@@ -258,7 +258,7 @@ class ExpressionMaker:
                     if len(itemBlock) == 1:
                         block[i] = itemBlock[0]
                     else:
-                        var = VariableNameGenerator.gen_name()
+                        var = VariableNameManager.gen_name()
                         itemCode, value = ExpressionMaker.make_expression(itemBlock, 'any')
                         command = {'type': '=', 'var': var, 'expression': value}
                         code = code + itemCode

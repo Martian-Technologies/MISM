@@ -152,9 +152,11 @@ class Assembler:
                 Assembler.definitions[tokens[1]] = tokens[2]
             else:
                 pass2.append(line)
-
-        if pass2[-1]['content'] != 'HALT':
-            pass2.append({'line': len(pass2)+1, 'content': 'HALT'})
+        if len(pass2) > 0:
+            if pass2[-1]['content'] != 'HALT':
+                pass2.append({'line': len(pass2)+1, 'content': 'HALT'})
+        else:
+            pass2.append({'line': 1, 'content': 'HALT'})
 
         if Assembler.doPrints:
             Assembler.print_pass(pass2)

@@ -1,6 +1,6 @@
 import copy
 import operator
-from varNameGen import VariableNameGenerator
+from VarNameManager import VariableNameManager
 
 if __name__ == "__main__":
     import main
@@ -25,11 +25,11 @@ class AssemblyBuilder:
         AssemblyBuilder.checkValidExpressionItem(line['expressionLeft'])
         AssemblyBuilder.checkValidExpressionItem(line['expressionRight'])
         if AssemblyBuilder.is_number(line['expressionLeft']):
-            varName = VariableNameGenerator.gen_name()
+            varName = VariableNameManager.gen_name()
             assemblyCode.append(f"SET {AssemblyBuilder.getVarID(varName)} {line['expressionLeft']}")
             line['expressionLeft'] = varName
         if AssemblyBuilder.is_number(line['expressionRight']):
-            varName = VariableNameGenerator.gen_name()
+            varName = VariableNameManager.gen_name()
             assemblyCode.append(f"SET {AssemblyBuilder.getVarID(varName)} {line['expressionRight']}")
             line['expressionRight'] = varName
         skipJumpName = AssemblyBuilder.gen_jump_name()
@@ -56,11 +56,11 @@ class AssemblyBuilder:
         assemblyCode = assemblyCode + assemblyCodeLeft
         assemblyCode = assemblyCode + assemblyCodeRight
         if AssemblyBuilder.is_number(line['expressionLeft']):
-            varName = VariableNameGenerator.gen_name()
+            varName = VariableNameManager.gen_name()
             assemblyCode.append(f"SET {AssemblyBuilder.getVarID(varName)} {line['expressionLeft']}")
             line['expressionLeft'] = varName
         if AssemblyBuilder.is_number(line['expressionRight']):
-            varName = VariableNameGenerator.gen_name()
+            varName = VariableNameManager.gen_name()
             assemblyCode.append(f"SET {AssemblyBuilder.getVarID(varName)} {line['expressionRight']}")
             line['expressionRight'] = varName
         skipJumpName = AssemblyBuilder.gen_jump_name()
@@ -83,11 +83,11 @@ class AssemblyBuilder:
         assemblyCodeRight = AssemblyBuilder.make_assembly(line['expressionRightCode'])
         AssemblyBuilder.checkValidExpressionItem(line['expressionRight'])
         if AssemblyBuilder.is_number(line['expressionLeft']):
-            varName = VariableNameGenerator.gen_name()
+            varName = VariableNameManager.gen_name()
             assemblyCodeLeft.append(f"SET {AssemblyBuilder.getVarID(varName)} {line['expressionLeft']}")
             line['expressionLeft'] = varName
         if AssemblyBuilder.is_number(line['expressionRight']):
-            varName = VariableNameGenerator.gen_name()
+            varName = VariableNameManager.gen_name()
             assemblyCodeRight.append(f"SET {AssemblyBuilder.getVarID(varName)} {line['expressionRight']}")
             line['expressionRight'] = varName
         repeatJumpName = AssemblyBuilder.gen_jump_name()
