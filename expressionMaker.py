@@ -1,5 +1,5 @@
 import json
-from VarNameManager import VariableNameManager
+from varNameManager import VariableNameManager
 
 if __name__ == "__main__":
     import main
@@ -212,9 +212,16 @@ class ExpressionMaker:
                 return expression
         itemTrio = []
         i = 0
+        operators = ['+', '-', '*', '/', '%', '^', '==', '>', '>=', '<', '<=']
         for item in expression:
             itemTrio.append(item)
             i += 1
+            if i == 2:
+                if not item in operators:
+                    raise Exception(f"{item} is not a valid operator in an expression")
+            else:
+                if type(item) == str and not (VariableNameManager.isValidVarName(item), VariableNameManager.is_number(item)):
+                    raise Exception(f"{item} is not a valid number or variable in an expression")
             if i >= 3:
                 temp = itemTrio.copy()
                 itemTrio = []

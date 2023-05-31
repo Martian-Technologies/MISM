@@ -1,4 +1,4 @@
-from VarNameManager import VariableNameManager
+from varNameManager import VariableNameManager
 
 if __name__ == "__main__":
     import main
@@ -76,6 +76,11 @@ class SingleCommandMaker:
         elif line[0] == 'func':
             if len(line) != 4:
                 raise Exception(f"function {line} does not have: 'func', 'name', ('args'), 'code'")
+            line[1] = line[1] + '_param_count:' + str(len(line[2]))
+            print(functions)
+            print(line[1])
+            if line[1] in functions:
+                raise Exception(f"function '{line[1]}({line[2]})' can not be declared twise in the same scope")
             command = {
                 'type': 'function',
                 'name': line[1],
@@ -128,30 +133,22 @@ class SingleCommandMaker:
                     'var': line[0],
                     'expression': SingleCommandMaker.make_expression([line[0], line[1][:1], '1'], functions, functionNames)
                 }
-            elif line[0] in functions:
-                if len(line) != 2:
-                    raise Exception(f"statement {line} is wrongly called")
-                if len(line[1]) != len(functions[line[0]]['params']):
-                    raise Exception(f"statement {line} is does not have the params {functions[line[0]]['params']}")
-                if line[0] in functionNames:
-                    raise Exception(f"can not call function {line[0]} in side of {functionNames[0]}, function call path {functionNames}")
-                command = {
-                    'type': 'function call',
-                    'name': line[0],
-                    'args': SingleCommandMaker.make_args(line[1], functions, functionNames),
-                }
             else:
-                raise Exception(f"could not find command {line}")
-        elif line[0] in functions:
-            if len(line) != 2:
-                raise Exception(f"statement {line} is wrongly called")
-            if len(line[1]) != len(functions[line[0]]['params']):
-                raise Exception(f"statement {line} is does not have the params {functions[line[0]]['params']}")
-            command = {
-                'type': 'function call',
-                'name': line[0],
-                'args': SingleCommandMaker.make_args(line[1], functions),
-            }
+                if line[0] + '_param_count:' + str(len(line[1])) in functions:
+                    if len(line) != 2:
+                        raise Exception(f"statement {line} is wrongly called")
+                    line[0] = line[0] + '_param_count:' + str(len(line[1]))
+                    if len(line[1]) != len(functions[line[0]]['params']):
+                        raise Exception(f"statement {line} is does not have the params {functions[line[0]]['params']}")
+                    if line[0] in functionNames:
+                        raise Exception(f"can not call function {line[0]} in side of {functionNames[0]}, function call path {functionNames}")
+                    command = {
+                        'type': 'function call',
+                        'name': line[0],
+                        'args': SingleCommandMaker.make_args(line[1], functions, functionNames),
+                    }
+                else:
+                    raise Exception(f"could not find command {line}")
         else:
             raise Exception(f"could not find command {line}")
         return command
@@ -168,14 +165,16 @@ class SingleCommandMaker:
         i = 0
         while i < len(expression):
             item = expression[i]
-            if item in tuple(functions.keys()):
-                if len(expression) - 1 != i:
+            if len(expression) - i > 1:
+                if item + '_param_count:' + str(len(expression[i+1])) in tuple(functions.keys()):
                     temp = expression[:i]
                     temp.append(SingleCommandMaker.make_command(expression[i:i+2], functions, functionNames))
                     temp = temp + expression[i+2:]
                     expression = temp
+                elif type(item) == list:
+                    expression[i] = SingleCommandMaker.make_expression(expression[i], functions, functionNames)
             elif type(item) == list:
-                expression[i] = SingleCommandMaker.make_expression(expression[i], functions, functionNames)
+                    expression[i] = SingleCommandMaker.make_expression(expression[i], functions, functionNames)
             i+=1
         
         return {

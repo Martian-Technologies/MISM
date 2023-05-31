@@ -1,15 +1,20 @@
 @replace
-func test(foo) {
-    if (foo >= 10) {
-        return(0);
-    } else {
-        return(1);
-    }
-}
-
-@replace
 func add(a, b) {
     return(a + b);
 }
 
-print(test(add(10, 3)));
+@replace
+func add(a, b, c) {
+    return(a + b + c);
+}
+
+@replace
+func tryAdds(a, b, c) {
+    test1 = add(a, b, c);
+    test2 = add(a, add(b, c));
+    print(test1);
+    print(test2);
+    return(test1 - test2);
+}
+
+print(tryAdds(1, 2, 3));

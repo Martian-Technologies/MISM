@@ -1,6 +1,6 @@
 import json
 from expressionMaker import ExpressionMaker
-from VarNameManager import VariableNameManager
+from varNameManager import VariableNameManager
 from functionManager import FunctionManager
 from singleCommandMaker import SingleCommandMaker
 

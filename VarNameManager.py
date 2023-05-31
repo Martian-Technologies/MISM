@@ -22,7 +22,7 @@ class VariableNameManager:
     
     @staticmethod
     def isValidVarName(name):
-        if VariableNameManager.is_number(name) or type(name) != str or name in ['+', '-', '*', '/', '%', '^']:
+        if VariableNameManager.is_number(name) or type(name) != str or name in ['+', '-', '*', '/', '%', '^', '==', '>', '>=', '<', '<=']:
             return False
         return True
     

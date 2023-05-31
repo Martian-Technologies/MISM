@@ -1,5 +1,5 @@
 import copy
-from VarNameManager import VariableNameManager
+from varNameManager import VariableNameManager
 
 if __name__ == "__main__":
     import main
@@ -47,7 +47,6 @@ class FunctionManager:
 
     @staticmethod
     def add_function(lineNumber: int, code: list, line: dict, function: dict, doReturn: bool = False):
-        print(function)
         funcCode: list = copy.deepcopy(function['code'])
         argI: int = 0
         for arg in line['args']:
@@ -61,9 +60,6 @@ class FunctionManager:
         returnName = None
         if doReturn:
             returnName = funcCode[0]['var']
-            print(returnName)
-        print('add_function')
-        print(funcCode)
         if not doReturn:
             del code[lineNumber]
             code = code[:lineNumber] + funcCode + code[lineNumber:]

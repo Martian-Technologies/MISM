@@ -1,5 +1,6 @@
 import json
 from codeSpliter import CodeSpliter
+from optimizer import Optimizer
 from piecer import Piecer
 from assemblyBuilder import AssemblyBuilder
 
@@ -18,6 +19,8 @@ class Compiler:
         code = CodeSpliter.split(inputCode)
         piecedCode = Piecer.piece(code)
         print('piecedCode:', json.dumps(piecedCode, indent=4))
-        assemblyCode = AssemblyBuilder.make_assembly(piecedCode)
+        optimizedPiecedCode = Optimizer.optimize_code(piecedCode)
+        print('optimizedPiecedCode:', json.dumps(optimizedPiecedCode, indent=4))
+        assemblyCode = AssemblyBuilder.make_assembly(optimizedPiecedCode)
         print('assemblyCode:', json.dumps(assemblyCode, indent=4))
         return assemblyCode

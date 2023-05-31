@@ -1,6 +1,6 @@
 import copy
 import operator
-from VarNameManager import VariableNameManager
+from varNameManager import VariableNameManager
 
 if __name__ == "__main__":
     import main
