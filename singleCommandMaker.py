@@ -39,7 +39,6 @@ class SingleCommandMaker:
             if len(line) < 3:
                 raise Exception(f"elif statement {line} does not have: 'elif', 'condition', 'code'")
             from piecer import Piecer
-            print(line)
             code = line[2:]
             while type(code) == list and len(code) == 1 and type(code[0]) == list and len(code[0]) == 1:
                 code = code[0]
@@ -55,7 +54,6 @@ class SingleCommandMaker:
             if len(line) < 2:
                 raise Exception(f"else statement {line} does not have: 'else', 'code'")
             from piecer import Piecer
-            print(line)
             code = line[1:]
             while type(code) == list and len(code) == 1 and type(code[0]) == list and len(code[0]) == 1:
                 code = code[0]

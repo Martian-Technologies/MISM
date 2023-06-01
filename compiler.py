@@ -18,7 +18,6 @@ class Compiler:
         """
         code = CodeSpliter.split(inputCode)
         piecedCode = Piecer.piece(code)
-        print('piecedCode:', json.dumps(piecedCode, indent=4))
         optimizedPiecedCode = Optimizer.optimize_code(piecedCode)
         print('optimizedPiecedCode:', json.dumps(optimizedPiecedCode, indent=4))
         assemblyCode = AssemblyBuilder.make_assembly(optimizedPiecedCode)

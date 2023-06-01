@@ -18,3 +18,13 @@ func tryAdds(a, b, c) {
 }
 
 print(tryAdds(1, 2, 3));
+
+b = 3;
+a = b;
+a = 1;
+b = 2;
+if (a > b)
+    print(a);
+else
+    print(b);
+j = 0;
