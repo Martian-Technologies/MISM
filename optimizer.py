@@ -1,5 +1,5 @@
 import json
-from optimizerUtil import OptimizerUtil
+from stackUtil import StackUtil
 from varNameManager import VariableNameManager
 
 if __name__ == "__main__":
@@ -8,12 +8,13 @@ if __name__ == "__main__":
 class Optimizer:
     @staticmethod
     def optimize_code(code):
-        code = OptimizerUtil.add_line_paths(code)
-        print('PiecedCode:', json.dumps(code, indent=4))
+        code = StackUtil.add_line_paths(code)
+        print('optimize_code input', json.dumps(code, indent=4))
         for func in Optimizer.optimizeFunction:
-            code = OptimizerUtil.add_line_paths(code)
-            varUsages = OptimizerUtil.get_var_usages(code)
+            code = StackUtil.add_line_paths(code)
+            varUsages = StackUtil.get_var_usages(code)
             code = func(code, varUsages)
+        code = StackUtil.add_line_paths(code)
         return code
 
     # you should rename this and name it the the type of optimization happening in it
@@ -21,7 +22,20 @@ class Optimizer:
     @staticmethod
     def optimize_code_function(code:list, varUsages:dict): 
         return code
+
+    @staticmethod
+    def remove_extra_defines(code:list, varUsages:dict):
+        for var in varUsages:
+            i = 0
+            for path in varUsages[var]:
+                if path['type'] == 'define':
+                    if i != 0:
+                        code = StackUtil.remove_command(code, path['stack'])
+                        varUsages = StackUtil.get_var_usages(code)
+                        return Optimizer.remove_extra_defines(code, varUsages)
+                i+=1
+        return code
     
     optimizeFunction = [
-        optimize_code_function,
+        remove_extra_defines,
     ]

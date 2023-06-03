@@ -25,7 +25,7 @@ class SingleCommandMaker:
                 raise Exception(f"if statement {line} does not have: 'if', 'condition', 'code'")
             from piecer import Piecer
             code = line[2:]
-            while type(code) == list and len(code) == 1 and type(code[0]) == list and len(code[0]) == 1:
+            while type(code) == list and len(code) == 1 and type(code[0]) == list and (len(code[0]) == 1 or type(code[0][0]) == list):
                 code = code[0]
             while type(code) == list and type(code[0]) != list:
                 code = [code]
@@ -40,7 +40,7 @@ class SingleCommandMaker:
                 raise Exception(f"elif statement {line} does not have: 'elif', 'condition', 'code'")
             from piecer import Piecer
             code = line[2:]
-            while type(code) == list and len(code) == 1 and type(code[0]) == list and len(code[0]) == 1:
+            while type(code) == list and len(code) == 1 and type(code[0]) == list and (len(code[0]) == 1 or type(code[0][0]) == list):
                 code = code[0]
             while type(code) == list and type(code[0]) != list:
                 code = [code]
@@ -55,7 +55,7 @@ class SingleCommandMaker:
                 raise Exception(f"else statement {line} does not have: 'else', 'code'")
             from piecer import Piecer
             code = line[1:]
-            while type(code) == list and len(code) == 1 and type(code[0]) == list and len(code[0]) == 1:
+            while type(code) == list and len(code) == 1 and type(code[0]) == list and (len(code[0]) == 1 or type(code[0][0]) == list):
                 code = code[0]
             while type(code) == list and type(code[0]) != list:
                 code = [code]
@@ -106,6 +106,16 @@ class SingleCommandMaker:
             functionCode = Piecer.piece(line[3], functions | {line[1]: command}, [line[1]] + functionNames)
             functionCode.insert(0, {'type': 'define', 'var':command['returnName']})
             command['code'] = functionCode
+        elif line[0] == 'raw':
+            if len(line) != 2:
+                raise Exception(f"raw code {line} does not have: 'raw', {'code'}")
+        elif line[0] == 'define':
+            if len(line) != 2:
+                raise Exception(f"define {line} does not have: 'define', 'var")
+            command = {
+                'type': 'define',
+                'var': line[1],
+            }
         elif line[0] == 'return':
             if len(line) == 1:
                 command = {
@@ -147,6 +157,7 @@ class SingleCommandMaker:
                     'expression': SingleCommandMaker.make_expression([line[0], line[1][:1], '1'], functions, functionNames)
                 }
             else:
+                print(line)
                 if line[0] + '_param_count:' + str(len(line[1])) in functions:
                     if len(line) != 2:
                         raise Exception(f"statement {line} is wrongly called")

@@ -4,7 +4,7 @@ from varNameManager import VariableNameManager
 if __name__ == "__main__":
     import main
 
-class OptimizerUtil:
+class StackUtil:
     @staticmethod
     def follow_index_stack(code, indexStack):
         out = code
@@ -16,7 +16,7 @@ class OptimizerUtil:
     def follow_index_stack_set(code, indexStack, value):
         if len(indexStack) == 0:
             return value
-        code[indexStack[0]] = OptimizerUtil.follow_index_stack_set(code[indexStack[0]], indexStack[1:], value)
+        code[indexStack[0]] = StackUtil.follow_index_stack_set(code[indexStack[0]], indexStack[1:], value)
         return code
     
     @staticmethod
@@ -37,11 +37,12 @@ class OptimizerUtil:
         If path2 is in a scope that path1 ends in it returns 'p2 in p1'\n
         If the paths are not connected it returns 'none'
         """
-        path1 = OptimizerUtil.get_code_stack(path1)
-        path2 = OptimizerUtil.get_code_stack(path2)
+        path1 = StackUtil.get_code_stack(path1)
+        path2 = StackUtil.get_code_stack(path2)
         searchLen = len(path1)
         if len(path1) > len(path2):
             searchLen = len(path2)
+        searchLen -= 1
         i = 0
         while i < searchLen:
             if path1[i] != path2[i]:
@@ -55,19 +56,21 @@ class OptimizerUtil:
             return 'same'
     
     @staticmethod
-    def removeCommand(code:list, stack:list):
-        codeStack = OptimizerUtil.get_code_stack(stack)
+    def remove_command(code:list, stack:list):
+        codeStack = StackUtil.get_code_stack(stack)
         if len(codeStack) == 0:
             raise Exception(f"can not remove command at {stack} because it does not goto a command")
-        listWithLine = OptimizerUtil.follow_index_stack(code, codeStack[:-1])
+        listWithLine = StackUtil.follow_index_stack(code, codeStack[:-1])
         del listWithLine[codeStack[-1]]
-        code = OptimizerUtil.follow_index_stack_set(code, codeStack[:-1], listWithLine)
+        code = StackUtil.follow_index_stack_set(code, codeStack[:-1], listWithLine)
         return code
     
     @staticmethod
-    def get_var_usages(code, usageType = 'any'):
+    def get_var_usages(code, usageType:str = 'any'):
         def get_var_usages_scan(code:list, indexStack:list, varUsageDict:dict, usageType:str):
-            block = OptimizerUtil.follow_index_stack(code, indexStack)
+            block = StackUtil.follow_index_stack(code, indexStack)
+            if block == None:
+                return varUsageDict
             if type(block) == dict:
                 i = 0
                 while i < len(block.keys()):
@@ -93,7 +96,10 @@ class OptimizerUtil:
                         varUsageDict[block] = []
                     varType = 'get'
                     if indexStack[len(indexStack)-1] == 'var':
-                        varType = 'set'
+                        if StackUtil.follow_index_stack(code, indexStack[:-1])['type'] == 'define':
+                            varType = 'define'
+                        else:
+                            varType = 'set'
                     varUsageDict[block].append({'type': varType, 'stack': copy(indexStack)})
             return varUsageDict
         return get_var_usages_scan(code, [], {}, usageType)
@@ -101,7 +107,7 @@ class OptimizerUtil:
     @staticmethod
     def add_line_paths(code):
         def add_line_paths_scan(code, indexStack):
-            block = OptimizerUtil.follow_index_stack(code, indexStack)
+            block = StackUtil.follow_index_stack(code, indexStack)
             if type(block) == dict:
                 block['line_path'] = copy(indexStack)
                 i = 0

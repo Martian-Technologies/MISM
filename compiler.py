@@ -1,5 +1,6 @@
 import json
 from codeSpliter import CodeSpliter
+from makeAllVarsUnique import MakeAllVarsUnique
 from optimizer import Optimizer
 from piecer import Piecer
 from assemblyBuilder import AssemblyBuilder
@@ -18,6 +19,7 @@ class Compiler:
         """
         code = CodeSpliter.split(inputCode)
         piecedCode = Piecer.piece(code)
+        piecedCode = MakeAllVarsUnique.make_all_vars_unique(piecedCode)
         optimizedPiecedCode = Optimizer.optimize_code(piecedCode)
         print('optimizedPiecedCode:', json.dumps(optimizedPiecedCode, indent=4))
         assemblyCode = AssemblyBuilder.make_assembly(optimizedPiecedCode)

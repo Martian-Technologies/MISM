@@ -45,7 +45,7 @@ class VariableNameManager:
             i = 0
             while i < len(code.keys()):
                 k = list(code.keys())[i]
-                if ('expression' in k) or ('condition' in k) or ('args' in k) or ('var' in k):
+                if ('expression' in k) or ('args' in k) or ('var' in k) or (k in ['init', 'increment', 'condition']):
                     code[k] = VariableNameManager.scan_replace_var_names(code[k], start, deepScan)
                 elif deepScan:
                     if ('code' in k) or ('else' in k):

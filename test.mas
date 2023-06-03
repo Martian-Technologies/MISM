@@ -1,8 +1,9 @@
-set 0 1
+set 0 0
 set 1 1
+set 2 100
 loop:
-    pria 0
+    raw 13 0
     opr add 0 1 0
-    pria 1
+    raw 13 1
     opr add 1 0 1
-    rjmp ~loop
+    JMPIF > 2 1 ~loop

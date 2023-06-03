@@ -201,8 +201,8 @@ class ExpressionMaker:
     }
     
     def get_expression_block(expression):
-        if len(expression) % 2 == 0:
-            raise Exception(f"invaild expression {expression}")
+        #if len(expression) % 2 == 0:
+        #    raise Exception(f"invaild expression {expression}")
         if len(expression) == 1:
             if type(expression[0]) == list:
                 return ExpressionMaker.get_expression_block(expression[0])
@@ -214,13 +214,18 @@ class ExpressionMaker:
         i = 0
         operators = ['+', '-', '*', '/', '%', '^', '==', '>', '>=', '<', '<=']
         for item in expression:
-            itemTrio.append(item)
+            if len(itemTrio) == i:
+                itemTrio.append(item)
+            else:
+                itemTrio[i] += item
             i += 1
             if i == 2:
                 if not item in operators:
                     raise Exception(f"{item} is not a valid operator in an expression")
             else:
-                if type(item) == str and not (VariableNameManager.isValidVarName(item), VariableNameManager.is_number(item)):
+                if item == '*':
+                    i -= 1
+                elif type(item) == str and not (VariableNameManager.isValidVarName(item), VariableNameManager.is_number(item)):
                     raise Exception(f"{item} is not a valid number or variable in an expression")
             if i >= 3:
                 temp = itemTrio.copy()

@@ -26,9 +26,8 @@ class CodeSpliter:
                 line = ''
             elif char == '(':
                 i, line = CodeSpliter.get_brace_block(i, line, code, '(', ')')
-            elif char == '/' and i+1 < len(code):
-                if code[i+1] == '/':
-                    i = CodeSpliter.get_next_char_pos(code, i)
+            elif char == '/' and i+1 < len(code) and code[i+1] == '/':
+                i = CodeSpliter.get_next_char_pos(code, i)
             elif char == '@':
                 isSetting = True
                 line += char

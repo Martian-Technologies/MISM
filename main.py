@@ -6,6 +6,9 @@ from emulator import Emulator
 from compiler import Compiler
 
 def run():
+    """runs all the code"""
+    
+    # compiler + assembler
     filename = 'test.itc'
     if len(sys.argv) > 1:
         filename = sys.argv[1]
@@ -20,25 +23,22 @@ def run():
         Emulator.run(code)
 
 
-    # fileName = 'test.mas'
+    # assembler
+    """
+    fileName = 'test.mas'
     
-    # if len(sys.argv) > 1:
-    #     fileName = sys.argv[1]
+    if len(sys.argv) > 1:
+        fileName = sys.argv[1]
 
-    # if not os.path.exists(fileName):
-    #     print(f'Error: file "{fileName}" not found')
-    #     exit(1)
+    if not os.path.exists(fileName):
+        print(f'Error: file "{fileName}" not found')
+        exit(1)
 
-    # code = []
-    # with open(fileName, 'r') as f:
-    #     code = Assembler.run(f.readlines(), doPrints = False)
+    code = []
+    with open(fileName, 'r') as f:
+        code = Assembler.run(f.readlines(), doPrints = False)
 
-    # Emulator.run(code)
-
-
-    # fix this nik
-    #if '--run' in sys.argv:
-    #    import subprocess
-    #    subprocess.run([sys.executable, 'emulator.py', dump_fileName], shell=True)
+    Emulator.run(code)
+    """
 
 run()
