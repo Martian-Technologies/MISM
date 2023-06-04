@@ -86,8 +86,9 @@ class CommandObjects:
                 originalLineNumber (int): The line number the command came from
             """
             super().__init__(code, 'template', pathToCommand, originalLine, originalLineNumber)
-            
-        def check_if_string_is_command(self, code:list, pathToCommand:list) -> list: # fill this in
+        
+        @staticmethod
+        def check_if_command_is_this(self, code:list, pathToCommand:list) -> list: # fill this in
             return False
         
         def reformat(code:list) -> list: # fill this in if needed
