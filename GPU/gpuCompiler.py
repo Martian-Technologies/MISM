@@ -26,7 +26,6 @@ class GPUCompiler:
         'id': 10,
         'input': 11,
         'in': 11,
-        
     }
     
     @staticmethod
