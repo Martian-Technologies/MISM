@@ -1,10 +1,10 @@
 radius = 4;
-for (y = -1*radius; y < radius+1; y++;) {
+for (y = -1*radius; y < radius+1; y++) {
     line = 0;
     index = 1;
     for (x = -1*radius; x < radius; x++) {
         if ((x*x)>(y+4)) {
-            line += 1 * index;
+            line += index;
         }
         index *= 10;
     }
