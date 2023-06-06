@@ -1,4 +1,5 @@
 import json
+from math import floor
 
 if __name__ == "__main__":
     import main
@@ -8,7 +9,7 @@ class GPUCompiler:
     def runCompiler(code):
         print('before:', code)
         commands = GPUCompiler.replace_symbols(code)
-        GPUCompiler.send_to_SM(commands, 12)
+        GPUCompiler.send_to_SM(commands, 24)
 
     replaceSymbolsMap = {
         'r>': 0,
@@ -20,12 +21,22 @@ class GPUCompiler:
         '%': 6,
         'sqrt': 7,
         'sq': 7,
-        '>': 8,
-        '=': 9,
-        'get id':10,
-        'id': 10,
-        'input': 11,
-        'in': 11,
+        'floor': 8,
+        'f': 8,
+        'max': 9,
+        'm': 9,
+        '>': 10,
+        '=': 11,
+        'input': 12,
+        'in': 12,
+        'computer input': 13,
+        'cin': 13,
+        'get data': 14,
+        'get': 14,
+        'get x': 15,
+        'x': 15,
+        'get y': 16,
+        'y': 16
     }
     
     @staticmethod
@@ -51,7 +62,7 @@ class GPUCompiler:
                 if type(command) == str:
                     command = command.lower()
                 if command in GPUCompiler.replaceSymbolsMap:
-                    command = GPUCompiler.replaceSymbolsMap[command]
+                    newCommand = GPUCompiler.replaceSymbolsMap[command]
             commands.append(newCommand) 
         return commands
 
@@ -63,13 +74,16 @@ class GPUCompiler:
         for command in commands:
             if type(command) == list:
                 data = None
+                dec = 1
+                if command[0] == GPUCompiler.replaceSymbolsMap['input']:
+                    dec = 100
                 if command[1] < 0:
                     if command[0] == 0:
-                        data = -(abs(command[1]) * encodingNumber)
+                        data = -(floor(abs(command[1]) * dec) * encodingNumber)
                     else:
-                        data = -((encodingNumber-command[0]) + abs(command[1]+1) * encodingNumber)
+                        data = -(encodingNumber-command[0] + floor(abs(command[1]) * dec) * encodingNumber)
                 else:
-                    data = command[0] + abs(command[1]) * encodingNumber
+                    data = command[0] + floor(abs(command[1]) * dec) * encodingNumber
                 numberCommands.append(data)
             else:
                 numberCommands.append(command)
