@@ -1,6 +1,6 @@
 import json
 from gpuCompiler import GPUCompiler
-from gpuEmulator import GPU
+from GPUemulator import GPUemulator
 import os
 import sys
 
@@ -27,7 +27,7 @@ def run():
     GPUCompiler.send_to_SM(numberCommands)
 
     # emulator
-    gpu = GPU()
-    gpu.run(numberCommands)
+    #gpu = GPUemulator.GPU()
+    #gpu.run(numberCommands)
 
 run()
