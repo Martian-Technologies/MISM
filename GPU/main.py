@@ -1,6 +1,6 @@
 import json
 from gpuCompiler import GPUCompiler
-from GPUemulator import GPUemulator
+from gpuEmulator import GPUemulator
 import os
 import sys
 
