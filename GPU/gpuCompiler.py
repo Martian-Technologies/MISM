@@ -8,7 +8,7 @@ class GPUCompiler:
     def runCompiler(code):
         print('before:', code)
         commands = GPUCompiler.replace_symbols(code)
-        GPUCompiler.send_to_SM(commands, 12)
+        GPUCompiler.send_to_SM(GPUCompiler.encode(commands, 12))
 
     replaceSymbolsMap = {
         'r>': 0,
@@ -56,7 +56,7 @@ class GPUCompiler:
         return commands
 
     @staticmethod
-    def send_to_SM(commands:list, encodingNumber:int):
+    def encode(commands: list, encodingNumber: int):
         print('after:', commands)
         print('length:', len(commands))
         numberCommands:list = []
@@ -74,5 +74,9 @@ class GPUCompiler:
             else:
                 numberCommands.append(command)
         print(numberCommands)
+        return numberCommands
+
+    @staticmethod
+    def send_to_SM(numberCommands: list[int]):
         with open("C:\Program Files (x86)\Steam\steamapps\common\Scrap Mechanic\Data\Importer\Importer.json", "w") as out_file:
             json.dump(numberCommands, out_file, indent = 4)
