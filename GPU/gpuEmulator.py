@@ -6,6 +6,7 @@ class Core(object):
         self.memory = []
         self.register = 0
     def run(self, instruction: str, argument: int):
+        if 
 
 class GPU(object):
     def __init__(self, cores: int):
