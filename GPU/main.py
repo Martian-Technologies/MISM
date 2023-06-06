@@ -26,8 +26,10 @@ def run():
     numberCommands = GPUCompiler.encode(commands, 24)
     GPUCompiler.send_to_SM(numberCommands)
 
-    # emulator
-    #gpu = GPUemulator.GPU()
-    #gpu.run(numberCommands)
+    #emulator
+    screen = GPUemulator.Screen(24, 16)
+    gpu = GPUemulator.GPU(64)
+    gpu.run(numberCommands, screen, layout=(8, 8))
+    screen.display()
 
 run()
