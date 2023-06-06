@@ -12,11 +12,10 @@ class GPUemulator:
         def set(self, x, y, value):
             self.screen[y][x] = value
         def display(self):
-            for row in self.screen:
-                for value in row:
-                    print('██' if value else '  ', end='')
-                print()
-            print()
+            print('+'+'-'*self.x_size*2+'+')
+            for row in self.screen:\
+                print('|'+''.join('██' if value else '  ' for value in row)+'|')
+            print('+'+'-'*self.x_size*2+'+')
 
     class Core(object):
         def __init__(self):
