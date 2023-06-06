@@ -23,7 +23,7 @@ def run():
         data = json.load(f)
     
     commands = GPUCompiler.replace_symbols(data)
-    numberCommands = GPUCompiler.encode(commands, 12)
+    numberCommands = GPUCompiler.encode(commands, 24)
     GPUCompiler.send_to_SM(numberCommands)
 
     # emulator
