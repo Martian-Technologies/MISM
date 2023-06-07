@@ -26,7 +26,7 @@ class GPUemulator:
                 self.register = self.memory.get(argument, 0)
             elif instruction == 'r<':
                 self.memory[argument] = self.register
-                # self.register = 0
+                self.register = 0
             elif instruction == '+':
                 self.register += self.memory.get(argument, 0)
             elif instruction == '-':
@@ -123,7 +123,7 @@ class GPUemulator:
                             argument = y * 100
                             # print('y', y)
                         core.run(instruction, argument)
-                    #     print(f'register: {core.register}')
+                    #    print(f'register: {core.register}')
                     #     mem_dump = []
                     #     for addr in core.memory:
                     #         while len(mem_dump) <= addr:
@@ -133,4 +133,4 @@ class GPUemulator:
                     #     print()
                     #     # input()
                     # print(core.register)
-                    screen.set(x, y, core.register > 0)
+                    screen.set(x, y, core.memory.get(commands[start:start+length][-1]// 24) > 0)
