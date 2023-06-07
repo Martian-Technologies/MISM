@@ -6,7 +6,7 @@ if __name__ == "__main__":
 
 class GPUCompiler:
     @staticmethod
-    def runCompiler(code):
+    def run_compiler(code):
         print('before:', code)
         commands = GPUCompiler.replace_symbols(code)
         GPUCompiler.send_to_SM(commands, 24)
@@ -92,5 +92,8 @@ class GPUCompiler:
 
     @staticmethod
     def send_to_SM(numberCommands: list[int]):
+        print("Import now")
         with open("C:\Program Files (x86)\Steam\steamapps\common\Scrap Mechanic\Data\Importer\Importer.json", "w") as out_file:
             json.dump(numberCommands, out_file, indent = 4)
+        print("Press enter when imported")
+        input()

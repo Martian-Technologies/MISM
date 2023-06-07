@@ -1,4 +1,5 @@
 import json
+from gpuJumper import GPUJumper
 from gpuCompiler import GPUCompiler
 from gpuEmulator import GPUemulator
 import os
@@ -26,6 +27,8 @@ def run():
     numberCommands = GPUCompiler.encode(commands, 24)
     GPUCompiler.send_to_SM(numberCommands)
 
+    GPUJumper.run_compiler(numberCommands)
+    
     #emulator
     screen = GPUemulator.Screen(24, 16)
     gpu = GPUemulator.GPU(64)
