@@ -31,8 +31,8 @@ def run():
     
     #emulator
     screen = GPUemulator.Screen(24, 16)
-    gpu = GPUemulator.GPU(64)
-    gpu.run(numberCommands, screen, layout=(8, 8))
+    gpu = GPUemulator.GPU(1)
+    gpu.run(numberCommands, screen, layout=(1, 1))
     screen.display()
 
 run()
