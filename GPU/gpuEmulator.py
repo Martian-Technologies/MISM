@@ -2,7 +2,7 @@ from __future__ import annotations
 import math
 if __name__ == "__main__":
     import main
-
+import json
 class GPUemulator:
     class Screen(object):
         def __init__(self, x_size, y_size):
@@ -26,6 +26,7 @@ class GPUemulator:
                 self.register = self.memory.get(argument, 0)
             elif instruction == 'r<':
                 self.memory[argument] = self.register
+                # self.register = 0
             elif instruction == '+':
                 self.register += self.memory.get(argument, 0)
             elif instruction == '-':
@@ -33,7 +34,7 @@ class GPUemulator:
             elif instruction == '*':
                 self.register *= self.memory.get(argument, 0)
             elif instruction == '/':
-                self.register /= self.memory.get(argument, 0)
+                self.register = self.register / self.memory.get(argument, 0)
             elif instruction == '%':
                 self.register = self.register % self.memory.get(argument, 0)
             elif instruction == 'sq':
@@ -69,6 +70,7 @@ class GPUemulator:
                 raise Exception('X should be replaced by IN <value> in GPU.run')
             elif instruction == 'y':
                 raise Exception('Y should be replaced by IN <value> in GPU.run')
+            self.register = max(-3.2999999654827e+38, min(3.2999999654827e+38, self.register))
 
     class GPU(object):
         def __init__(self, cores: int):
@@ -83,6 +85,7 @@ class GPUemulator:
                 for x in range(screen.x_size):
                     x_ind = x % layout[0]
                     y_ind = y % layout[1]
+                    # print(f'calculating pixel {x}, {y} on core {y_ind * layout[0] + x_ind}')
                     core = self.cores[y_ind * layout[0] + x_ind]
                     for command in commands[start:start+length]:
                         instruction = command % 24
@@ -107,6 +110,7 @@ class GPUemulator:
                             'x',
                             'y',
                         ][instruction]
+                        # print(f'command: {instruction} {argument}')
                         if instruction == 'get':
                             instruction = 'in'
                             argument = ROM[argument] if argument > 0 and argument < len(ROM) and argument%1==0 else 0
@@ -119,5 +123,14 @@ class GPUemulator:
                             argument = y * 100
                             # print('y', y)
                         core.run(instruction, argument)
+                    #     print(f'register: {core.register}')
+                    #     mem_dump = []
+                    #     for addr in core.memory:
+                    #         while len(mem_dump) <= addr:
+                    #             mem_dump.append(0)
+                    #         mem_dump[addr] = core.memory[addr]
+                    #     print(f'memory:\n{json.dumps(mem_dump)}')
+                    #     print()
+                    #     # input()
                     # print(core.register)
                     screen.set(x, y, core.register > 0)
