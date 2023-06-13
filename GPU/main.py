@@ -30,7 +30,7 @@ def run():
     GPUJumper.run_compiler(numberCommands)
     
     #emulator
-    screen = GPUemulator.Screen(24, 16)
+    screen = GPUemulator.Screen(64, 32)
     gpu = GPUemulator.GPU(64)
     gpu.run(numberCommands, screen, layout=(8, 8))
     screen.display()

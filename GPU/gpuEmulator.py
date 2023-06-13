@@ -34,7 +34,10 @@ class GPUemulator:
             elif instruction == '*':
                 self.register *= self.memory.get(argument, 0)
             elif instruction == '/':
-                self.register = self.register / self.memory.get(argument, 0)
+                if self.memory.get(argument, 0) == 0:
+                    self.register = float('inf') if self.register > 0 else float('-inf') if self.register < 0 else 1
+                else:
+                    self.register = self.register / self.memory.get(argument, 0)
             elif instruction == '%':
                 self.register = self.register % self.memory.get(argument, 0)
             elif instruction == 'sq':
