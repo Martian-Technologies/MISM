@@ -41,19 +41,20 @@ class GPUemulator:
             elif instruction == '%':
                 self.register = self.register % self.memory.get(argument, 0)
             elif instruction == 'sq':
-                if self.memory.get(argument, 0) == 0:
-                    raise Exception('cannot root 0')
-                root_value = self.memory.get(argument, 0)
-                if root_value == 0 and self.register == 1:
-                    self.register = 1
-                elif root_value == 0:
-                    raise Exception('cannot root 0')
-                elif root_value == 2:
-                    self.register = math.sqrt(self.register)
-                elif root_value == 3:
-                    self.register = math.cbrt(self.register)
-                else:
-                    self.register = self.register ** (1 / root_value)
+                try:
+                    if self.memory.get(argument, 0) == 0:
+                        if self.register == 0:
+                            self.register = 0
+                        else:
+                            self.register = float('inf')
+                    elif self.memory.get(argument, 0) == 2:
+                        self.register = math.sqrt(self.register)
+                    elif self.memory.get(argument, 0) == -2:
+                        self.register = 1/math.sqrt(self.register)
+                    else:
+                        self.register = (1/self.register ** self.memory.get(argument, 0))
+                except ValueError:
+                    self.register = 0
             elif instruction == 'f':
                 self.register = math.floor(self.register)
             elif instruction == 'm':
