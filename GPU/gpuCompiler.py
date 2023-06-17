@@ -81,7 +81,7 @@ class GPUCompiler:
                     if command[0] == 0:
                         data = -(floor(abs(command[1]) * dec) * encodingNumber)
                     else:
-                        data = -(encodingNumber-command[0] + floor(abs(command[1]) * dec) * encodingNumber)
+                        data = -(encodingNumber-command[0] + floor(abs(command[1]) * dec - 1) * encodingNumber)
                 else:
                     data = command[0] + floor(abs(command[1]) * dec) * encodingNumber
                 numberCommands.append(data)
