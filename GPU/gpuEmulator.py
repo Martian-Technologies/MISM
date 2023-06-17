@@ -21,6 +21,7 @@ class GPUemulator:
         def __init__(self):
             self.memory = {}
             self.register = 0
+            self.ROM = []
         def run(self, instruction: str, argument: int):
             if instruction == 'r>':
                 self.register = self.memory.get(argument, 0)
@@ -35,26 +36,25 @@ class GPUemulator:
                 self.register *= self.memory.get(argument, 0)
             elif instruction == '/':
                 if self.memory.get(argument, 0) == 0:
-                    self.register = float('inf') if self.register > 0 else float('-inf') if self.register < 0 else 1
+                    self.register = 100000000
                 else:
                     self.register = self.register / self.memory.get(argument, 0)
             elif instruction == '%':
                 self.register = self.register % self.memory.get(argument, 0)
             elif instruction == 'sq':
-                try:
-                    if self.memory.get(argument, 0) == 0:
-                        if self.register == 0:
-                            self.register = 0
-                        else:
-                            self.register = float('inf')
-                    elif self.memory.get(argument, 0) == 2:
-                        self.register = math.sqrt(self.register)
-                    elif self.memory.get(argument, 0) == -2:
-                        self.register = 1/math.sqrt(self.register)
-                    else:
-                        self.register = (1/self.register ** self.memory.get(argument, 0))
-                except ValueError:
-                    self.register = 0
+                if self.memory.get(argument, 0) == 0:
+                    raise Exception('cannot root 0')
+                root_value = self.memory.get(argument, 0)
+                if root_value == 0 and self.register == 1:
+                    self.register = 1
+                elif root_value == 0:
+                    raise Exception('cannot root 0')
+                elif root_value == 2:
+                    self.register = math.sqrt(self.register)
+                elif root_value == 3:
+                    self.register = math.cbrt(self.register)
+                else:
+                    self.register = self.register ** (1 / root_value)
             elif instruction == 'f':
                 self.register = math.floor(self.register)
             elif instruction == 'm':
@@ -69,7 +69,11 @@ class GPUemulator:
                 # not implemented
                 raise NotImplementedError('Command CIN not implemented')
             elif instruction == 'get':
-                raise Exception('GET should be replaced by IN <value> in GPU.run')
+                if self.register % 1 == 0 and self.register > 0 and self.register < len(self.ROM):
+                    self.register = math.floor(self.register)
+                    self.register = self.ROM[self.register]
+                else:
+                    self.register = 0
             elif instruction == 'x':
                 raise Exception('X should be replaced by IN <value> in GPU.run')
             elif instruction == 'y':
@@ -90,7 +94,8 @@ class GPUemulator:
                     x_ind = x % layout[0]
                     y_ind = y % layout[1]
                     # print(f'calculating pixel {x}, {y} on core {y_ind * layout[0] + x_ind}')
-                    core = self.cores[y_ind * layout[0] + x_ind]
+                    core:GPUemulator.Core = self.cores[y_ind * layout[0] + x_ind]
+                    core.ROM = ROM
                     for command in commands[start:start+length]:
                         instruction = command % 24
                         argument = command // 24
@@ -115,10 +120,7 @@ class GPUemulator:
                             'y',
                         ][instruction]
                         # print(f'command: {instruction} {argument}')
-                        if instruction == 'get':
-                            instruction = 'in'
-                            argument = ROM[argument] if argument > 0 and argument < len(ROM) and argument%1==0 else 0
-                        elif instruction == 'x':
+                        if instruction == 'x':
                             instruction = 'in'
                             argument = x * 100
                             # print('x', x)
@@ -127,14 +129,14 @@ class GPUemulator:
                             argument = y * 100
                             # print('y', y)
                         core.run(instruction, argument)
-                    #    print(f'register: {core.register}')
-                    #     mem_dump = []
-                    #     for addr in core.memory:
-                    #         while len(mem_dump) <= addr:
-                    #             mem_dump.append(0)
-                    #         mem_dump[addr] = core.memory[addr]
-                    #     print(f'memory:\n{json.dumps(mem_dump)}')
-                    #     print()
-                    #     # input()
-                    # print(core.register)
+                    print(x, y, core.memory)
+                    # mem_dump = []
+                    # for addr in core.memory:
+                    #     addr += 10
+                    #     while len(mem_dump) <= addr:
+                    #         mem_dump.append(0)
+                    #     mem_dump[addr] = core.memory[addr-10]
+                    # print(f'memory:\n{json.dumps(mem_dump)}')
+                    # print()
+                    # input()
                     screen.set(x, y, core.memory.get(commands[start:start+length][-1]// 24) > 0)

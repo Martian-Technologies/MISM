@@ -1,7 +1,7 @@
-[
-    3,
-    2,
-    393,
-    19,
-    0
-]
+from math import floor
+
+num = -160
+
+print(num//100)
+print(num/100)
+print(floor(-1.6))
