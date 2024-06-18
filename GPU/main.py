@@ -14,7 +14,7 @@ def run():
     if len(sys.argv) > 1:
         filename = sys.argv[1]
     
-    filename = r"GPU\\" + filename
+    filename = r"GPU/" + filename
 
     if not os.path.exists(filename):
         print(f'Error: file "{filename}" not found')
@@ -73,7 +73,7 @@ def run():
  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]
         
     #emulator
-    screen = GPUemulator.Screen(64, 32)
+    screen = GPUemulator.Screen(24, 16)
     gpu = GPUemulator.GPU(64)
     gpu.run(numberCommands, screen, layout=(8, 8), ROM=ROM)
     screen.display()
